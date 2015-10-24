@@ -15,13 +15,23 @@ THREE.OBJMTLLoader.prototype = {
 
 	constructor: THREE.OBJMTLLoader,
 
-	load: function ( url, mtlurl, onLoad, onProgress, onError ) {
+    /**
+     * Load a Wavefront OBJ file with materials (MTL file)
+     *
+     * If the MTL file cannot be loaded, then a MeshLambertMaterial is used as a default
+     * @param url - Location of OBJ file to load
+     * @param mtlurl - MTL file to load (optional, if not specified, attempts to use MTL specified in OBJ file)
+     * @param options - Options on how to interpret the material (see THREE.MTLLoader.MaterialCreator )
+     */
+    load: function ( url, mtlurl, options, onLoad, onProgress, onError ) {
 
 		var scope = this;
 
 		var mtlLoader = new THREE.MTLLoader( this.manager );
 		mtlLoader.setBaseUrl( url.substr( 0, url.lastIndexOf( "/" ) + 1 ) );
 		mtlLoader.setCrossOrigin( this.crossOrigin );
+                // AXC: Set material options
+                mtlLoader.setMaterialOptions( options );
 		mtlLoader.load( mtlurl, function ( materials ) {
 
 			var materialsCreator = materials;
@@ -31,7 +41,7 @@ THREE.OBJMTLLoader.prototype = {
 			loader.setCrossOrigin( scope.crossOrigin );
 			loader.load( url, function ( text ) {
 
-				var object = scope.parse( text );
+				var object = scope.parse( text, undefined, options );
 
 				object.traverse( function ( object ) {
 
@@ -70,7 +80,14 @@ THREE.OBJMTLLoader.prototype = {
 	 * @return {THREE.Object3D} - Object3D (with default material)
 	 */
 
-	parse: function ( data, mtllibCallback ) {
+	parse: function ( data, mtllibCallback, options) {
+
+        function color( r, g, b ) {
+            // NOTE: The THREE.Color constructor is buggy
+            var c = new THREE.Color();
+            c.setRGB( parseFloat( r ), parseFloat( g ), parseFloat( b ) );
+            return c;
+        }
 
 		function vector( x, y, z ) {
 
@@ -94,22 +111,35 @@ THREE.OBJMTLLoader.prototype = {
 
 		function meshN( meshName, materialName ) {
 
-			if ( vertices.length > 0 ) {
+			if ( vertices.length > 0 && geometry.faces.length > 0 ) {
 
 				geometry.vertices = vertices;
+                                geometry.colors = colors;
 
 				geometry.mergeVertices();
 				geometry.computeFaceNormals();
 				geometry.computeBoundingSphere();
 
+                if (options.useBuffers) {
+                    var bufferGeom = new THREE.BufferGeometry();
+                    bufferGeom.fromGeometry(geometry);
+                    mesh.geometry = bufferGeom;
+                }
+
 				object.add( mesh );
 
 				geometry = new THREE.Geometry();
 				mesh = new THREE.Mesh( geometry, material );
-
+                meshCount++;
 			}
 
 			if ( meshName !== undefined ) mesh.name = meshName;
+            else if (mesh.name === undefined) {
+                mesh.name = 'mesh' + meshCount;
+            }
+            mesh.userData = {
+                index: meshCount
+            };
 
 			if ( materialName !== undefined ) {
 
@@ -128,10 +158,12 @@ THREE.OBJMTLLoader.prototype = {
 		var geometry = new THREE.Geometry();
 		var material = new THREE.MeshLambertMaterial();
 		var mesh = new THREE.Mesh( geometry, material );
+        var meshCount = 0;
 
 		var vertices = [];
 		var normals = [];
 		var uvs = [];
+    var colors = [];
 
 		function add_face( a, b, c, normals_inds ) {
 
@@ -158,6 +190,14 @@ THREE.OBJMTLLoader.prototype = {
 
 			}
 
+			if (colors.length > 0) {
+				var face = geometry.faces[geometry.faces.length - 1];
+				var indices = [face.a, face.b, face.c];
+				for (var j = 0; j < 3; j++) {
+					var vertexIndex = indices[j];
+					face.vertexColors[j] = colors[vertexIndex];
+				}
+			}
 		}
 
 		function add_uvs( a, b, c ) {
@@ -212,6 +252,10 @@ THREE.OBJMTLLoader.prototype = {
 
 		var vertex_pattern = /v( +[\d|\.|\+|\-|e]+)( +[\d|\.|\+|\-|e]+)( +[\d|\.|\+|\-|e]+)/;
 
+		// v float float float float float float
+
+		var vertex_color_pattern = /v( +[\d|\.|\+|\-|e]+)( +[\d|\.|\+|\-|e]+)( +[\d|\.|\+|\-|e]+)( +[\d|\.|\+|\-|e]+)( +[\d|\.|\+|\-|e]+)( +[\d|\.|\+|\-|e]+)/;
+
 		// vn float float float
 
 		var normal_pattern = /vn( +[\d|\.|\+|\-|e]+)( +[\d|\.|\+|\-|e]+)( +[\d|\.|\+|\-|e]+)/;
@@ -251,6 +295,18 @@ THREE.OBJMTLLoader.prototype = {
 
 				continue;
 
+			} else if (( result = vertex_color_pattern.exec(line) ) !== null) {
+				vertices.push(
+					vector(
+						parseFloat(result[1]), parseFloat(result[2]), parseFloat(result[3])
+					)
+				);
+
+				colors.push(
+					color(
+						result[4], result[5], result[6]
+					)
+				);
 			} else if ( ( result = vertex_pattern.exec( line ) ) !== null ) {
 
 				// ["v 1.0 2.0 3.0", "1.0", "2.0", "3.0"]
@@ -322,6 +378,7 @@ THREE.OBJMTLLoader.prototype = {
 				meshN();
 				face_offset = face_offset + vertices.length;
 				vertices = [];
+        colors = [];
 				object = new THREE.Object3D();
 				object.name = line.substring( 2 ).trim();
 				group.add( object );

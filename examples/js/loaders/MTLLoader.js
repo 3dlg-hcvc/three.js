@@ -141,6 +141,14 @@ THREE.MTLLoader.MaterialCreator = function( baseUrl, options ) {
 	this.side = ( this.options && this.options.side ) ? this.options.side : THREE.FrontSide;
 	this.wrap = ( this.options && this.options.wrap ) ? this.options.wrap : THREE.RepeatWrapping;
 
+	// AXC: Allow for different url for textures than baseUrl
+	this.textureUrl = baseUrl;
+	if (options && options.materialBase) {
+		this.textureUrl = options.materialBase;
+	}
+	if (this.textureUrl && this.textureUrl.charAt(this.textureUrl.length-1) != '/') {
+		this.textureUrl = this.textureUrl + "/";
+	}
 };
 
 THREE.MTLLoader.MaterialCreator.prototype = {
@@ -174,6 +182,7 @@ THREE.MTLLoader.MaterialCreator.prototype = {
 
 		var converted = {};
 
+		var hasKd = false; // AXC: for defaultColor
 		for ( var mn in materialsInfo ) {
 
 			// Convert materials info into normalized form based on options
@@ -193,6 +202,7 @@ THREE.MTLLoader.MaterialCreator.prototype = {
 				switch ( lprop ) {
 
 					case 'kd':
+						hasKd = true; // AXC: for defaultColor
 					case 'ka':
 					case 'ks':
 
@@ -245,6 +255,15 @@ THREE.MTLLoader.MaterialCreator.prototype = {
 
 			}
 
+			// AXC: Handle options.defaultColor
+			// Set if we haven't set any material/color but saw a kd that was ignored...
+			// Needed for wss models that have kd set to 0 but actually has a material...
+			if (this.options && this.options.defaultColor ) {
+				var hasColorOrMaterial = covmat['map_kd'] || covmat['kd'];
+				if (!hasColorOrMaterial && hasKd) {
+					covmat['kd'] = this.options.defaultColor;
+				}
+			}
 		}
 
 		return converted;
@@ -319,7 +338,7 @@ THREE.MTLLoader.MaterialCreator.prototype = {
 
 					// Diffuse color (color under white light) using RGB values
 
-					params[ 'color' ] = new THREE.Color().fromArray( value );
+					params[ 'diffuse' ] = new THREE.Color().fromArray( value );
 
 					break;
 
@@ -339,8 +358,8 @@ THREE.MTLLoader.MaterialCreator.prototype = {
 				case 'map_kd':
 
 					// Diffuse texture map
-
-					params[ 'map' ] = this.loadTexture( this.baseUrl + value );
+                                        // AXC: Allow for different url for textures than baseUrl
+					params[ 'map' ] = this.loadTexture( this.textureUrl + value );
 					params[ 'map' ].wrapS = this.wrap;
 					params[ 'map' ].wrapT = this.wrap;
 
@@ -351,7 +370,7 @@ THREE.MTLLoader.MaterialCreator.prototype = {
 					// The specular exponent (defines the focus of the specular highlight)
 					// A high exponent results in a tight, concentrated highlight. Ns values normally range from 0 to 1000.
 
-					params[ 'shininess' ] = parseFloat( value );
+					params[ 'shininess' ] = value;
 
 					break;
 
@@ -376,8 +395,8 @@ THREE.MTLLoader.MaterialCreator.prototype = {
 					// Bump texture map
 
 					if ( params[ 'bumpMap' ] ) break; // Avoid loading twice.
-
-					params[ 'bumpMap' ] = this.loadTexture( this.baseUrl + value );
+                                        // AXC: Allow for different url for textures than baseUrl
+					params[ 'bumpMap' ] = this.loadTexture( this.textureUrl + value );
 					params[ 'bumpMap' ].wrapS = this.wrap;
 					params[ 'bumpMap' ].wrapT = this.wrap;
 
@@ -389,6 +408,15 @@ THREE.MTLLoader.MaterialCreator.prototype = {
 			}
 
 		}
+
+		if ( params[ 'diffuse' ] ) {
+
+			params[ 'color' ] = params[ 'diffuse' ];
+
+		}
+
+		delete params.ambient;  // AXC: THREE.js now warns about extra params, ambient is no longer supported
+		delete params.diffuse;  // AXC: THREE.js now warns about extra params, diffuse is mapped to color
 
 		this.materials[ materialName ] = new THREE.MeshPhongMaterial( params );
 		return this.materials[ materialName ];
