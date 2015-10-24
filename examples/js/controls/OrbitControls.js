@@ -366,6 +366,8 @@
 		// Mouse buttons
 		this.mouseButtons = { ORBIT: THREE.MOUSE.LEFT, ZOOM: THREE.MOUSE.MIDDLE, PAN: THREE.MOUSE.RIGHT };
 
+		this.panRequiresShift = false;
+
 		////////////
 		// internals
 
@@ -458,7 +460,10 @@
 
 			event.preventDefault();
 
-			if ( event.button === scope.mouseButtons.ORBIT ) {
+      // NOTE(MS): Allow setting of Shift as modifier for panning
+			var isPan = (event.button === scope.mouseButtons.PAN) && (!scope.panRequiresShift || event.shiftKey);
+
+			if ( event.button === scope.mouseButtons.ORBIT && !isPan) {
 
 				if ( scope.enableRotate === false ) return;
 
@@ -474,7 +479,7 @@
 
 				dollyStart.set( event.clientX, event.clientY );
 
-			} else if ( event.button === scope.mouseButtons.PAN ) {
+			} else if ( isPan ) {
 
 				if ( scope.enablePan === false ) return;
 

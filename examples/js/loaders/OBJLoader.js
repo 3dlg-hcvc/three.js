@@ -71,6 +71,15 @@ THREE.OBJLoader.prototype = {
 				vertices[ c ], vertices[ c + 1 ], vertices[ c + 2 ]
 			);
 
+            // AXC: Add vertex colors
+            if (colors.length > 0 ) {
+                geometry.colors.push(
+                    colors[ a ], colors[ a + 1 ], colors[ a + 2 ],
+                    colors[ b ], colors[ b + 1 ], colors[ b + 2 ],
+                    colors[ c ], colors[ c + 1 ], colors[ c + 2 ]
+                );
+
+            }
 		}
 
 		function addNormal( a, b, c ) {
@@ -164,7 +173,8 @@ THREE.OBJLoader.prototype = {
 			geometry = {
 				vertices: [],
 				normals: [],
-				uvs: []
+				uvs: [],
+                                colors: []              // AXC: Add vertex colors
 			};
 
 			material = {
@@ -184,10 +194,15 @@ THREE.OBJLoader.prototype = {
 		var vertices = [];
 		var normals = [];
 		var uvs = [];
+                var colors = [];              // AXC: Add vertex colors
 
 		// v float float float
 
 		var vertex_pattern = /v( +[\d|\.|\+|\-|e|E]+)( +[\d|\.|\+|\-|e|E]+)( +[\d|\.|\+|\-|e|E]+)/;
+
+                // AXC: Add vertex colors                 
+                // v float float float float float float
+                var vertex_color_pattern = /v( +[\d|\.|\+|\-|e]+)( +[\d|\.|\+|\-|e]+)( +[\d|\.|\+|\-|e]+)( +[\d|\.|\+|\-|e]+)( +[\d|\.|\+|\-|e]+)( +[\d|\.|\+|\-|e]+)/;
 
 		// vn float float float
 
@@ -228,6 +243,19 @@ THREE.OBJLoader.prototype = {
 
 				continue;
 
+                        // AXC: Add vertex colors
+			} else if (( result = vertex_color_pattern.exec(line) ) !== null) {
+				vertices.push(
+					parseFloat(result[1]),
+					parseFloat(result[2]),
+					parseFloat(result[3])
+				);
+
+				colors.push(
+					parseFloat(result[4]),
+					parseFloat(result[5]),
+					parseFloat(result[6])
+				);
 			} else if ( ( result = vertex_pattern.exec( line ) ) !== null ) {
 
 				// ["v 1.0 2.0 3.0", "1.0", "2.0", "3.0"]
@@ -299,7 +327,8 @@ THREE.OBJLoader.prototype = {
 				geometry = {
 					vertices: [],
 					normals: [],
-					uvs: []
+					uvs: [],
+                                        colors: []              // AXC: Add vertex colors
 				};
 
 				material = {
@@ -360,7 +389,11 @@ THREE.OBJLoader.prototype = {
 			if ( geometry.uvs.length > 0 ) {
 
 				buffergeometry.addAttribute( 'uv', new THREE.BufferAttribute( new Float32Array( geometry.uvs ), 2 ) );
+                        }
 
+                        // AXC: Add vertex colors
+			if (geometry.colors.length > 0) {
+				buffergeometry.addAttribute('color', new THREE.BufferAttribute(new Float32Array(geometry.colors), 3));
 			}
 
 			material = new THREE.MeshLambertMaterial();
