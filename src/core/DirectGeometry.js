@@ -203,7 +203,7 @@ THREE.DirectGeometry.prototype = {
 
 				} else {
 
-					console.warn( 'THREE.DirectGeometry.fromGeometry(): Undefined vertexUv ', i );
+					//console.warn( 'THREE.DirectGeometry.fromGeometry(): Undefined vertexUv ', i );  // NOTE(MS): Remove this since it fires on sparsely populated face uv arrays
 
 					this.uvs.push( new THREE.Vector2(), new THREE.Vector2(), new THREE.Vector2() );
 
