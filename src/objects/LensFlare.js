@@ -78,9 +78,9 @@ THREE.LensFlare.prototype.updateLensFlares = function () {
 
 };
 
-THREE.LensFlare.prototype.copy = function ( source ) {
+THREE.LensFlare.prototype.copy = function ( source, recursive ) {
 
-	THREE.Object3D.prototype.copy.call( this, source );
+	THREE.Object3D.prototype.copy.call( this, source, recursive );
 
 	this.positionScreen.copy( source.positionScreen );
 	this.customUpdateCallback = source.customUpdateCallback;
