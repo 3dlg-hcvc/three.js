@@ -143,8 +143,8 @@ THREE.SkinnedMesh.prototype.updateMatrixWorld = function( force ) {
 
 };
 
-THREE.SkinnedMesh.prototype.clone = function() {
+THREE.SkinnedMesh.prototype.clone = function(recursive) {
 
-	return new this.constructor( this.geometry, this.material, this.useVertexTexture ).copy( this );
+	return new this.constructor( this.geometry, this.material, this.useVertexTexture ).copy( this, recursive );
 
 };

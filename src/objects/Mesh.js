@@ -324,8 +324,8 @@ THREE.Mesh.prototype.raycast = ( function () {
 
 }() );
 
-THREE.Mesh.prototype.clone = function () {
+THREE.Mesh.prototype.clone = function (recursive) {
 
-	return new this.constructor( this.geometry, this.material ).copy( this );
+	return new this.constructor( this.geometry, this.material ).copy( this, recursive );
 
 };

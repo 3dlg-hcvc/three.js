@@ -175,9 +175,9 @@ THREE.Line.prototype.raycast = ( function () {
 
 }() );
 
-THREE.Line.prototype.clone = function () {
+THREE.Line.prototype.clone = function (recursive) {
 
-	return new this.constructor( this.geometry, this.material ).copy( this );
+	return new this.constructor( this.geometry, this.material ).copy( this, recursive );
 
 };
 

@@ -60,9 +60,9 @@ THREE.Sprite.prototype.raycast = ( function () {
 
 }() );
 
-THREE.Sprite.prototype.clone = function () {
+THREE.Sprite.prototype.clone = function (recursive) {
 
-	return new this.constructor( this.material ).copy( this );
+	return new this.constructor( this.material ).copy( this, recursive );
 
 };
 

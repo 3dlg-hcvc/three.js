@@ -120,9 +120,9 @@ THREE.Points.prototype.raycast = ( function () {
 
 }() );
 
-THREE.Points.prototype.clone = function () {
+THREE.Points.prototype.clone = function (recursive) {
 
-	return new this.constructor( this.geometry, this.material ).copy( this );
+	return new this.constructor( this.geometry, this.material ).copy( this, recursive );
 
 };
 
