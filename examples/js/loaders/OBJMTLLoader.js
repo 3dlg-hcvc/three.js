@@ -30,41 +30,71 @@ THREE.OBJMTLLoader.prototype = {
 		var mtlLoader = new THREE.MTLLoader( this.manager );
 		mtlLoader.setBaseUrl( url.substr( 0, url.lastIndexOf( "/" ) + 1 ) );
 		mtlLoader.setCrossOrigin( this.crossOrigin );
-                // AXC: Set material options
-                mtlLoader.setMaterialOptions( options );
-		mtlLoader.load( mtlurl, function ( materials ) {
+		// AXC: Set material options
+		mtlLoader.setMaterialOptions( options );
 
-			var materialsCreator = materials;
-			materialsCreator.preload();
+		// AXC: Redo load so relative MTL references from OBJ file are okay
+		function applyMaterials(object, materialsCreator) {
+			object.traverse(function (object) {
+				if (object instanceof THREE.Mesh) {
+					if (object.material.name) {
+						var material = materialsCreator.create(object.material.name);
+						if (material) object.material = material;
+					}
+				}
+			});
+		}
 
+		function loadObj(materialsCreator) {
 			var loader = new THREE.XHRLoader( scope.manager );
 			loader.setCrossOrigin( scope.crossOrigin );
 			loader.load( url, function ( text ) {
-
-				var object = scope.parse( text, undefined, options );
-
-				object.traverse( function ( object ) {
-
-					if ( object instanceof THREE.Mesh ) {
-
-						if ( object.material.name ) {
-
-							var material = materialsCreator.create( object.material.name );
-
-							if ( material ) object.material = material;
-
-						}
-
-					}
-
-				} );
-
+				var object = scope.parse(text, undefined, options);
+				applyMaterials(object, materialsCreator);
 				onLoad( object );
-
 			}, onProgress, onError );
+		}
 
-		}, onProgress, onError );
+		function loadObjWithMTLCallback() {
+			var hasMtl = false;
+			var object = null;
+			var materialsCreator = null;
+			function mtllibCallback(mtlfile) {
+				hasMtl = true;
+				mtlLoader.load(mtlLoader.baseUrl + mtlfile, function (materials) {
+					var mc = materials;
+					mc.preload();
+					if (object) {
+						applyMaterials(object, mc);
+						onLoad(object);
+					}
+					materialsCreator = mc;
+				}, onProgress, onError);
+			}
+			var loader = new THREE.XHRLoader(scope.manager);
+			loader.setCrossOrigin(scope.crossOrigin);
+			loader.load(url, function (text) {
+				object = scope.parse(text, mtllibCallback, options);
+				if (hasMtl) {
+					if (materialsCreator) {
+						applyMaterials(object, materialsCreator);
+						onLoad(object);
+					}
+				} else {
+					onLoad(object);
+				}
+			}, onProgress, onError);
+		};
 
+		if (mtlurl) {
+			mtlLoader.load(mtlurl, function (materials) {
+				var materialsCreator = materials;
+				materialsCreator.preload();
+				loadObj(materialsCreator);
+			}, onProgress, onError);
+		} else {
+			loadObjWithMTLCallback();
+		}	
 	},
 
 	setCrossOrigin: function ( value ) {
