@@ -144,32 +144,32 @@ THREE.OBJMTLLoader.prototype = {
 			if ( vertices.length > 0 && geometry.faces.length > 0 ) {
 
 				geometry.vertices = vertices;
-                                geometry.colors = colors;
+				geometry.colors = colors;
 
 				geometry.mergeVertices();
 				geometry.computeFaceNormals();
 				geometry.computeBoundingSphere();
 
-                if (options.useBuffers) {
-                    var bufferGeom = new THREE.BufferGeometry();
-                    bufferGeom.fromGeometry(geometry);
-                    mesh.geometry = bufferGeom;
-                }
+				if (options.useBuffers) {
+					var bufferGeom = new THREE.BufferGeometry();
+					bufferGeom.fromGeometry(geometry);
+					mesh.geometry = bufferGeom;
+				}
 
 				object.add( mesh );
 
 				geometry = new THREE.Geometry();
 				mesh = new THREE.Mesh( geometry, material );
-                meshCount++;
+				meshCount++;
 			}
 
 			if ( meshName !== undefined ) mesh.name = meshName;
-            else if (mesh.name === undefined) {
-                mesh.name = 'mesh' + meshCount;
-            }
-            mesh.userData = {
-                index: meshCount
-            };
+			else if (mesh.name === undefined) {
+				mesh.name = 'mesh' + meshCount;
+			}
+			mesh.userData = {
+				index: meshCount
+			};
 
 			if ( materialName !== undefined ) {
 
@@ -188,12 +188,12 @@ THREE.OBJMTLLoader.prototype = {
 		var geometry = new THREE.Geometry();
 		var material = new THREE.MeshLambertMaterial();
 		var mesh = new THREE.Mesh( geometry, material );
-        var meshCount = 0;
+		var meshCount = 0;
 
 		var vertices = [];
 		var normals = [];
 		var uvs = [];
-    var colors = [];
+		var colors = [];
 
 		function add_face( a, b, c, normals_inds ) {
 
@@ -310,6 +310,13 @@ THREE.OBJMTLLoader.prototype = {
 
 		var face_pattern4 = /f( +(\d+)\/\/(\d+))( +(\d+)\/\/(\d+))( +(\d+)\/\/(\d+))( +(\d+)\/\/(\d+))?/;
 
+		// AXC: Warn lines not handled just once
+		// l vertex vertex ... (not currently handled)
+		var line_pattern1 = /l( +\d+)( +\d+)/;
+
+		var line_pattern2 = /l( +(\d+)\/(\d+))( +(\d+)\/(\d+))/;
+
+		var line_warning_emitted = false;
 		//
 
 		var lines = data.split( "\n" );
@@ -318,6 +325,13 @@ THREE.OBJMTLLoader.prototype = {
 
 			var line = lines[ i ];
 			line = line.trim();
+
+			// AXC: handle QNANs
+			var newline = line.replace("1.#QNAN", "0");
+			if (newline !== line) {
+				console.log("THREE.OBJMTLLoader: NAN encountered: " + line);
+				line = newline;
+			}
 
 			var result;
 
@@ -408,7 +422,7 @@ THREE.OBJMTLLoader.prototype = {
 				meshN();
 				face_offset = face_offset + vertices.length;
 				vertices = [];
-        colors = [];
+				colors = [];
 				object = new THREE.Object3D();
 				object.name = line.substring( 2 ).trim();
 				group.add( object );
@@ -441,6 +455,18 @@ THREE.OBJMTLLoader.prototype = {
 
 				// Smooth shading
 
+			} else if ( ( result = line_pattern1.exec( line ) ) !== null ) {
+				// AXC: Warn lines not handled just once
+				if (!line_warning_emitted) {
+					console.log( "THREE.OBJMTLLoader: Support for lines not implemented: " + line );
+					line_warning_emitted = true;
+				}
+			} else if ( ( result = line_pattern2.exec( line ) ) !== null ) {
+				// AXC: Warn lines not handled just once
+				if (!line_warning_emitted) {
+					console.log( "THREE.OBJMTLLoader: Support for lines not implemented: " + line );
+					line_warning_emitted = true;
+				}
 			} else {
 
 				console.log( "THREE.OBJMTLLoader: Unhandled line " + line );
