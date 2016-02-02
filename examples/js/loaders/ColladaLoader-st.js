@@ -611,7 +611,9 @@ THREE.ColladaLoader = function () {
 			bone.parent = parentid;
 			bone.matrix = node.matrix;
 			var data = [ new THREE.Vector3(),new THREE.Quaternion(),new THREE.Vector3() ];
-			bone.matrix.decompose(data[0], data[1], data[2]);
+			if (bone.matrix) {
+				bone.matrix.decompose(data[0], data[1], data[2]);
+			}
 
 			bone.pos = [ data[0].x,data[0].y,data[0].z ];
 
