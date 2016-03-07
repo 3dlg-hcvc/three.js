@@ -27,8 +27,9 @@
  */
 
 
-THREE.PLYLoader = function ( manager ) {
-
+THREE.PLYLoader = function ( params ) {
+	var manager = ( params ) ? params.manager : undefined;
+	this.computeNormals = params.computeNormals;
 	this.manager = ( manager !== undefined ) ? manager : THREE.DefaultLoadingManager;
 
 	this.propertyNameMapping = {};
@@ -80,16 +81,35 @@ THREE.PLYLoader.prototype = {
 
 	},
 
+	// Convert header to string
+	bin2str_header: function ( buf ) {
+
+		var array_buffer = new Uint8Array( buf );
+		var str = '';
+		for ( var i = 0; i < buf.byteLength; i ++ ) {
+			var ch = String.fromCharCode( array_buffer[ i ] ); // implicitly assumes little-endian
+			str += ch;
+			if (ch === '\n') {
+				// Check if header ended
+				if (str.indexOf('end_header') >= 0) {
+					break;
+				}
+			}
+		}
+
+		return str;
+
+	},
+
 	isASCII: function( data ) {
 
-		var header = this.parseHeader( this.bin2str( data ) );
+		var header = this.parseHeader( this.bin2str_header( data ) );
 
 		return header.format === "ascii";
 
 	},
 
 	parse: function ( data ) {
-
 		if ( data instanceof ArrayBuffer ) {
 
 			return this.isASCII( data )
@@ -343,6 +363,10 @@ THREE.PLYLoader.prototype = {
 
 		}
 
+		if (this.computeNormals) {
+			geometry.computeFaceNormals();
+			geometry.computeVertexNormals();
+		}
 		geometry.computeBoundingSphere();
 
 		return geometry;
@@ -357,6 +381,12 @@ THREE.PLYLoader.prototype = {
 				new THREE.Vector3( element.x, element.y, element.z )
 			);
 
+			// We recompute normals at the end
+			//if ( 'nx' in element && 'ny' in element && 'nz' in element ) {
+		 	//	geometry.normals.push(
+			//		new THREE.Vector3( element.nx, element.ny, element.nz )
+			//	);
+			//}
 			if ( 'red' in element && 'green' in element && 'blue' in element ) {
 
 				geometry.useColor = true;
@@ -366,6 +396,7 @@ THREE.PLYLoader.prototype = {
 				geometry.colors.push( color );
 
 			}
+			// TODO: handle alpha
 
 		} else if ( elementName === "face" ) {
 
@@ -455,10 +486,10 @@ THREE.PLYLoader.prototype = {
 	},
 
 	parseBinary: function ( data ) {
-
 		var geometry = new THREE.Geometry();
+		//geometry.normals = [];
 
-		var header = this.parseHeader( this.bin2str( data ) );
+		var header = this.parseHeader( this.bin2str_header( data ) );
 		var little_endian = ( header.format === "binary_little_endian" );
 		var body = new DataView( data, header.headerLength );
 		var result, loc = 0;
