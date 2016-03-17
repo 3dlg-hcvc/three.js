@@ -14402,7 +14402,7 @@ THREE.Loader.prototype = {
 			function loadTexture( path, repeat, offset, wrap, anisotropy ) {
 
 				var fullPath = texturePath + path;
-				var loader = THREE.Loader.Handlers.get( fullPath );
+				var loader = THREE.Loader.Handlers.get( fullPath );        
 
 				var texture;
 
@@ -14416,6 +14416,7 @@ THREE.Loader.prototype = {
 					texture = textureLoader.load( fullPath );
 
 				}
+ 				texture.name = path;  // AXC: Name of texture using path
 
 				if ( repeat !== undefined ) {
 
