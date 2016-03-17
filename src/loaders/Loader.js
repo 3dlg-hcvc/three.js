@@ -10,6 +10,9 @@ THREE.Loader = function () {
 
 };
 
+// AXC: Added so THREE.js will report messages on deprecated stuff, but not so much!!!
+THREE.Loader.__reportedMessages = {};  
+
 THREE.Loader.prototype = {
 
 	constructor: THREE.Loader,
@@ -224,7 +227,10 @@ THREE.Loader.prototype = {
 						json.side = THREE.DoubleSide;
 						break;
 					case 'transparency':
-						console.warn( 'THREE.Loader: transparency has been renamed to opacity' );
+						if (!THREE.Loader.__reportedMessages['transparency renamed']) {   // AXC: Make reporting of these messages quieter
+							console.warn( 'THREE.Loader: transparency has been renamed to opacity' );
+							THREE.Loader.__reportedMessages['transparency renamed'] = true;
+						}              
 						json.opacity = value;
 						break;
 					case 'opacity':
@@ -241,7 +247,10 @@ THREE.Loader.prototype = {
 						if ( value === 'face' ) json.vertexColors = THREE.FaceColors;
 						break;
 					default:
-						console.error( 'Loader.createMaterial: Unsupported', name, value );
+						if (!THREE.Loader.__reportedMessages['unsupported ' + name]) {   // AXC: Make reporting of these messages quieter
+							console.error( 'Loader.createMaterial: Unsupported', name, value );
+							THREE.Loader.__reportedMessages['unsupported ' + name] = true;
+						}              
 						break;
 				}
 
