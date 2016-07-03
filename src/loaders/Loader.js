@@ -49,7 +49,7 @@ THREE.Loader.prototype = {
 
 		var color, textureLoader, materialLoader;
 
-		return function ( m, texturePath, crossOrigin ) {
+		return function createMaterial( m, texturePath, crossOrigin ) {
 
 			if ( color === undefined ) color = new THREE.Color();
 			if ( textureLoader === undefined ) textureLoader = new THREE.TextureLoader();
@@ -130,18 +130,19 @@ THREE.Loader.prototype = {
 
 				switch ( name ) {
 					case 'DbgColor':
-						json.color = value;
-						break;
 					case 'DbgIndex':
 					case 'opticalDensity':
 					case 'illumination':
-						// These were never supported
 						break;
 					case 'DbgName':
 						json.name = value;
 						break;
 					case 'blending':
 						json.blending = THREE[ value ];
+						break;
+					case 'colorAmbient':
+					case 'mapAmbient':
+						console.warn( 'THREE.Loader.createMaterial:', name, 'is no longer supported.' );
 						break;
 					case 'colorDiffuse':
 						json.color = color.fromArray( value ).getHex();
@@ -158,6 +159,7 @@ THREE.Loader.prototype = {
 					case 'shading':
 						if ( value.toLowerCase() === 'basic' ) json.type = 'MeshBasicMaterial';
 						if ( value.toLowerCase() === 'phong' ) json.type = 'MeshPhongMaterial';
+						if ( value.toLowerCase() === 'standard' ) json.type = 'MeshStandardMaterial';
 						break;
 					case 'mapDiffuse':
 						json.map = loadTexture( value, m.mapDiffuseRepeat, m.mapDiffuseOffset, m.mapDiffuseWrap, m.mapDiffuseAnisotropy );
@@ -166,6 +168,14 @@ THREE.Loader.prototype = {
 					case 'mapDiffuseOffset':
 					case 'mapDiffuseWrap':
 					case 'mapDiffuseAnisotropy':
+						break;
+					case 'mapEmissive':
+						json.emissiveMap = loadTexture( value, m.mapEmissiveRepeat, m.mapEmissiveOffset, m.mapEmissiveWrap, m.mapEmissiveAnisotropy );
+						break;
+					case 'mapEmissiveRepeat':
+					case 'mapEmissiveOffset':
+					case 'mapEmissiveWrap':
+					case 'mapEmissiveAnisotropy':
 						break;
 					case 'mapLight':
 						json.lightMap = loadTexture( value, m.mapLightRepeat, m.mapLightOffset, m.mapLightWrap, m.mapLightAnisotropy );
@@ -213,6 +223,22 @@ THREE.Loader.prototype = {
 					case 'mapSpecularWrap':
 					case 'mapSpecularAnisotropy':
 						break;
+					case 'mapMetalness':
+						json.metalnessMap = loadTexture( value, m.mapMetalnessRepeat, m.mapMetalnessOffset, m.mapMetalnessWrap, m.mapMetalnessAnisotropy );
+						break;
+					case 'mapMetalnessRepeat':
+					case 'mapMetalnessOffset':
+					case 'mapMetalnessWrap':
+					case 'mapMetalnessAnisotropy':
+						break;
+					case 'mapRoughness':
+						json.roughnessMap = loadTexture( value, m.mapRoughnessRepeat, m.mapRoughnessOffset, m.mapRoughnessWrap, m.mapRoughnessAnisotropy );
+						break;
+					case 'mapRoughnessRepeat':
+					case 'mapRoughnessOffset':
+					case 'mapRoughnessWrap':
+					case 'mapRoughnessAnisotropy':
+						break;
 					case 'mapAlpha':
 						json.alphaMap = loadTexture( value, m.mapAlphaRepeat, m.mapAlphaOffset, m.mapAlphaWrap, m.mapAlphaAnisotropy );
 						break;
@@ -229,15 +255,16 @@ THREE.Loader.prototype = {
 						break;
 					case 'transparency':
 						if (!THREE.Loader.__reportedMessages['transparency renamed']) {   // AXC: Make reporting of these messages quieter
-							console.warn( 'THREE.Loader: transparency has been renamed to opacity' );
+							console.warn( 'THREE.Loader.createMaterial: transparency has been renamed to opacity' );
 							THREE.Loader.__reportedMessages['transparency renamed'] = true;
 						}              
 						json.opacity = value;
 						break;
-					case 'opacity':
-					case 'transparent':
 					case 'depthTest':
 					case 'depthWrite':
+					case 'colorWrite':
+					case 'opacity':
+					case 'reflectivity':
 					case 'transparent':
 					case 'visible':
 					case 'wireframe':
@@ -248,16 +275,22 @@ THREE.Loader.prototype = {
 						if ( value === 'face' ) json.vertexColors = THREE.FaceColors;
 						break;
 					default:
+<<<<<<< HEAD
 						if (!THREE.Loader.__reportedMessages['unsupported ' + name]) {   // AXC: Make reporting of these messages quieter
 							console.error( 'Loader.createMaterial: Unsupported', name, value );
 							THREE.Loader.__reportedMessages['unsupported ' + name] = true;
 						}              
+=======
+						console.error( 'THREE.Loader.createMaterial: Unsupported', name, value );
+>>>>>>> upstream/master
 						break;
 				}
 
 			}
 
+			if ( json.type === 'MeshBasicMaterial' ) delete json.emissive;
 			if ( json.type !== 'MeshPhongMaterial' ) delete json.specular;
+
 			if ( json.opacity < 1 ) json.transparent = true;
 
 			materialLoader.setTextures( textures );

@@ -1,8 +1,8 @@
 /**
  * @author Wei Meng / http://about.me/menway
  *
- * Description: A THREE loader for PLY ASCII files (known as the Polygon File Format or the Stanford Triangle Format).
- *
+ * Description: A THREE loader for PLY ASCII files (known as the Polygon
+ * File Format or the Stanford Triangle Format).
  *
  * Limitations: ASCII decoding assumes file is UTF-8.
  *
@@ -45,7 +45,6 @@ THREE.PLYLoader.prototype = {
 		var scope = this;
 
 		var loader = new THREE.XHRLoader( this.manager );
-		loader.setCrossOrigin( this.crossOrigin );
 		loader.setResponseType( 'arraybuffer' );
 		loader.load( url, function ( text ) {
 
@@ -55,478 +54,492 @@ THREE.PLYLoader.prototype = {
 
 	},
 
-	setCrossOrigin: function ( value ) {
-
-		this.crossOrigin = value;
-
-	},
-
 	setPropertyNameMapping: function ( mapping ) {
 
 		this.propertyNameMapping = mapping;
 
 	},
 
-	bin2str: function ( buf ) {
+	parse: function ( data ) {
 
-		var array_buffer = new Uint8Array( buf );
-		var str = '';
-		for ( var i = 0; i < buf.byteLength; i ++ ) {
+		// AXC: Convert header to string
+		function bin2str_header( buf ) {
 
-			str += String.fromCharCode( array_buffer[ i ] ); // implicitly assumes little-endian
-
-		}
-
-		return str;
-
-	},
-
-	// Convert header to string
-	bin2str_header: function ( buf ) {
-
-		var array_buffer = new Uint8Array( buf );
-		var str = '';
-		for ( var i = 0; i < buf.byteLength; i ++ ) {
-			var ch = String.fromCharCode( array_buffer[ i ] ); // implicitly assumes little-endian
-			str += ch;
-			if (ch === '\n') {
-				// Check if header ended
-				if (str.indexOf('end_header') >= 0) {
-					break;
+			var array_buffer = new Uint8Array( buf );
+			var str = '';
+			for ( var i = 0; i < buf.byteLength; i ++ ) {
+				var ch = String.fromCharCode( array_buffer[ i ] ); // implicitly assumes little-endian
+				str += ch;
+				if (ch === '\n') {
+					// Check if header ended
+					if (str.indexOf('end_header') >= 0) {
+						break;
+					}
 				}
 			}
+
+			return str;
 		}
 
-		return str;
+		function isASCII( data ) {
 
-	},
-
-	isASCII: function( data ) {
-
-		var header = this.parseHeader( this.bin2str_header( data ) );
-
-		return header.format === "ascii";
-
-	},
-
-	parse: function ( data ) {
-		if ( data instanceof ArrayBuffer ) {
-
-			return this.isASCII( data )
-				? this.parseASCII( this.bin2str( data ) )
-				: this.parseBinary( data );
-
-		} else {
-
-			return this.parseASCII( data );
+			var header = parseHeader( bin2str_header( data ) );
+			return header.format === "ascii";
 
 		}
 
-	},
+		function bin2str( buf ) {
 
-	parseHeader: function ( data ) {
+			var array_buffer = new Uint8Array( buf );
+			var str = '';
 
-		var patternHeader = /ply([\s\S]*)end_header\s/;
-		var headerText = "";
-		var headerLength = 0;
-		var result = patternHeader.exec( data );
-		if ( result !== null ) {
+			for ( var i = 0; i < buf.byteLength; i ++ ) {
 
-			headerText = result [ 1 ];
-			headerLength = result[ 0 ].length;
+				str += String.fromCharCode( array_buffer[ i ] ); // implicitly assumes little-endian
+
+			}
+
+			return str;
 
 		}
 
-		var header = {
-			comments: [],
-			elements: [],
-			headerLength: headerLength
-		};
+		function parseHeader( data ) {
 
-		var lines = headerText.split( '\n' );
-		var currentElement = undefined;
-		var lineType, lineValues;
+			var patternHeader = /ply([\s\S]*)end_header\s/;
+			var headerText = "";
+			var headerLength = 0;
+			var result = patternHeader.exec( data );
 
-		function make_ply_element_property( propertValues, propertyNameMapping ) {
+			if ( result !== null ) {
 
-			var property = {
-				type: propertValues[ 0 ]
+				headerText = result [ 1 ];
+				headerLength = result[ 0 ].length;
+
+			}
+
+			var header = {
+				comments: [],
+				elements: [],
+				headerLength: headerLength
 			};
 
-			if ( property.type === 'list' ) {
+			var lines = headerText.split( '\n' );
+			var currentElement;
+			var lineType, lineValues;
 
-				property.name = propertValues[ 3 ];
-				property.countType = propertValues[ 1 ];
-				property.itemType = propertValues[ 2 ];
+			function make_ply_element_property( propertValues, propertyNameMapping ) {
 
-			} else {
+				var property = { type: propertValues[ 0 ] };
 
-				property.name = propertValues[ 1 ];
+				if ( property.type === 'list' ) {
 
-			}
+					property.name = propertValues[ 3 ];
+					property.countType = propertValues[ 1 ];
+					property.itemType = propertValues[ 2 ];
 
-			if ( property.name in propertyNameMapping ) {
+				} else {
 
-				property.name = propertyNameMapping[ property.name ];
-
-			}
-
-			return property;
-
-		}
-
-		for ( var i = 0; i < lines.length; i ++ ) {
-
-			var line = lines[ i ];
-			line = line.trim();
-			if ( line === "" ) {
-
-				continue;
-
-			}
-			lineValues = line.split( /\s+/ );
-			lineType = lineValues.shift();
-			line = lineValues.join( " " );
-
-			switch ( lineType ) {
-
-			case "format":
-
-				header.format = lineValues[ 0 ];
-				header.version = lineValues[ 1 ];
-
-				break;
-
-			case "comment":
-
-				header.comments.push( line );
-
-				break;
-
-			case "element":
-
-				if ( ! ( currentElement === undefined ) ) {
-
-					header.elements.push( currentElement );
+					property.name = propertValues[ 1 ];
 
 				}
 
-				currentElement = Object();
-				currentElement.name = lineValues[ 0 ];
-				currentElement.count = parseInt( lineValues[ 1 ] );
-				currentElement.properties = [];
+				if ( property.name in propertyNameMapping ) {
 
-				break;
-
-			case "property":
-
-				currentElement.properties.push( make_ply_element_property( lineValues, this.propertyNameMapping ) );
-
-				break;
-
-
-			default:
-
-				console.log( "unhandled", lineType, lineValues );
-
-			}
-
-		}
-
-		if ( ! ( currentElement === undefined ) ) {
-
-			header.elements.push( currentElement );
-
-		}
-
-		return header;
-
-	},
-
-	parseASCIINumber: function ( n, type ) {
-
-		switch ( type ) {
-
-		case 'char': case 'uchar': case 'short': case 'ushort': case 'int': case 'uint':
-		case 'int8': case 'uint8': case 'int16': case 'uint16': case 'int32': case 'uint32':
-
-			return parseInt( n );
-
-		case 'float': case 'double': case 'float32': case 'float64':
-
-			return parseFloat( n );
-
-		}
-
-	},
-
-	parseASCIIElement: function ( properties, line ) {
-
-		var values = line.split( /\s+/ );
-
-		var element = Object();
-
-		for ( var i = 0; i < properties.length; i ++ ) {
-
-			if ( properties[ i ].type === "list" ) {
-
-				var list = [];
-				var n = this.parseASCIINumber( values.shift(), properties[ i ].countType );
-
-				for ( var j = 0; j < n; j ++ ) {
-
-					list.push( this.parseASCIINumber( values.shift(), properties[ i ].itemType ) );
+					property.name = propertyNameMapping[ property.name ];
 
 				}
 
-				element[ properties[ i ].name ] = list;
+				return property;
 
-			} else {
+			}
 
-				element[ properties[ i ].name ] = this.parseASCIINumber( values.shift(), properties[ i ].type );
+			for ( var i = 0; i < lines.length; i ++ ) {
+
+				var line = lines[ i ];
+				line = line.trim();
+
+				if ( line === "" ) continue;
+
+				lineValues = line.split( /\s+/ );
+				lineType = lineValues.shift();
+				line = lineValues.join( " " );
+
+				switch ( lineType ) {
+
+					case "format":
+
+						header.format = lineValues[ 0 ];
+						header.version = lineValues[ 1 ];
+
+						break;
+
+					case "comment":
+
+						header.comments.push( line );
+
+						break;
+
+					case "element":
+
+						if ( currentElement !== undefined ) {
+
+							header.elements.push( currentElement );
+
+						}
+
+						currentElement = {};
+						currentElement.name = lineValues[ 0 ];
+						currentElement.count = parseInt( lineValues[ 1 ] );
+						currentElement.properties = [];
+
+						break;
+
+					case "property":
+
+						currentElement.properties.push( make_ply_element_property( lineValues, scope.propertyNameMapping ) );
+
+						break;
+
+
+					default:
+
+						console.log( "unhandled", lineType, lineValues );
+
+				}
+
+			}
+
+			if ( currentElement !== undefined ) {
+
+				header.elements.push( currentElement );
+
+			}
+
+			return header;
+
+		}
+
+		function parseASCIINumber( n, type ) {
+
+			switch ( type ) {
+
+			case 'char': case 'uchar': case 'short': case 'ushort': case 'int': case 'uint':
+			case 'int8': case 'uint8': case 'int16': case 'uint16': case 'int32': case 'uint32':
+
+				return parseInt( n );
+
+			case 'float': case 'double': case 'float32': case 'float64':
+
+				return parseFloat( n );
 
 			}
 
 		}
 
-		return element;
+		function parseASCIIElement( properties, line ) {
 
-	},
+			var values = line.split( /\s+/ );
 
-	parseASCII: function ( data ) {
+			var element = {};
 
-		// PLY ascii format specification, as per http://en.wikipedia.org/wiki/PLY_(file_format)
+			for ( var i = 0; i < properties.length; i ++ ) {
 
-		var geometry = new THREE.Geometry();
+				if ( properties[ i ].type === "list" ) {
 
-		var result;
+					var list = [];
+					var n = parseASCIINumber( values.shift(), properties[ i ].countType );
 
-		var header = this.parseHeader( data );
+					for ( var j = 0; j < n; j ++ ) {
 
-		var patternBody = /end_header\s([\s\S]*)$/;
-		var body = "";
-		if ( ( result = patternBody.exec( data ) ) !== null ) {
+						list.push( parseASCIINumber( values.shift(), properties[ i ].itemType ) );
 
-			body = result [ 1 ];
+					}
 
-		}
+					element[ properties[ i ].name ] = list;
 
-		var lines = body.split( '\n' );
-		var currentElement = 0;
-		var currentElementCount = 0;
-		geometry.useColor = false;
+				} else {
 
-		for ( var i = 0; i < lines.length; i ++ ) {
+					element[ properties[ i ].name ] = parseASCIINumber( values.shift(), properties[ i ].type );
 
-			var line = lines[ i ];
-			line = line.trim();
-			if ( line === "" ) {
-
-				continue;
+				}
 
 			}
 
-			if ( currentElementCount >= header.elements[ currentElement ].count ) {
-
-				currentElement ++;
-				currentElementCount = 0;
-
-			}
-
-			var element = this.parseASCIIElement( header.elements[ currentElement ].properties, line );
-
-			this.handleElement( geometry, header.elements[ currentElement ].name, element );
-
-			currentElementCount ++;
+			return element;
 
 		}
 
-		return this.postProcess( geometry );
+		function parseASCII( data ) {
 
-	},
+			// PLY ascii format specification, as per http://en.wikipedia.org/wiki/PLY_(file_format)
 
-	postProcess: function ( geometry ) {
+			var geometry = new THREE.Geometry();
 
-		if ( geometry.useColor ) {
+			var result;
 
-			for ( var i = 0; i < geometry.faces.length; i ++ ) {
+			var header = parseHeader( data );
 
-				geometry.faces[ i ].vertexColors = [
-					geometry.colors[ geometry.faces[ i ].a ],
-					geometry.colors[ geometry.faces[ i ].b ],
-					geometry.colors[ geometry.faces[ i ].c ]
-				];
+			var patternBody = /end_header\s([\s\S]*)$/;
+			var body = "";
+			if ( ( result = patternBody.exec( data ) ) !== null ) {
+
+				body = result [ 1 ];
 
 			}
 
-			geometry.colorsNeedUpdate = true;
+			var lines = body.split( '\n' );
+			var currentElement = 0;
+			var currentElementCount = 0;
+			geometry.useColor = false;
+
+			for ( var i = 0; i < lines.length; i ++ ) {
+
+				var line = lines[ i ];
+				line = line.trim();
+				if ( line === "" ) {
+
+					continue;
+
+				}
+
+				if ( currentElementCount >= header.elements[ currentElement ].count ) {
+
+					currentElement ++;
+					currentElementCount = 0;
+
+				}
+
+				var element = parseASCIIElement( header.elements[ currentElement ].properties, line );
+
+				handleElement( geometry, header.elements[ currentElement ].name, element );
+
+				currentElementCount ++;
+
+			}
+
+			return postProcess( geometry );
 
 		}
 
-		if (this.computeNormals) {
-			geometry.computeFaceNormals();
-			geometry.computeVertexNormals();
-			geometry.useNormals = true;
-		} else {
+		function postProcess( geometry ) {
 
-			if (geometry.normals.length > 0) {
-				geometry.useNormals = true;
+			if ( geometry.useColor ) {
+
 				for ( var i = 0; i < geometry.faces.length; i ++ ) {
-					geometry.faces[ i ].vertexNormals = [
-						geometry.normals[ geometry.faces[ i ].a ],
-						geometry.normals[ geometry.faces[ i ].b ],
-						geometry.normals[ geometry.faces[ i ].c ]
+
+					geometry.faces[ i ].vertexColors = [
+						geometry.colors[ geometry.faces[ i ].a ],
+						geometry.colors[ geometry.faces[ i ].b ],
+						geometry.colors[ geometry.faces[ i ].c ]
 					];
+
 				}
+
+				//geometry.elementsNeedUpdate = true;
+				geometry.colorsNeedUpdate = true;
+
 			}
-		}
-		geometry.computeBoundingSphere();
 
-		return geometry;
 
-	},
-
-	handleElement: function ( geometry, elementName, element ) {
-
-		if ( elementName === "vertex" ) {
-
-			geometry.vertices.push(
-				new THREE.Vector3( element.x, element.y, element.z )
-			);
-
-			if (!this.computeNormals) {
-				if ('nx' in element && 'ny' in element && 'nz' in element) {
-					geometry.normals.push(
-						new THREE.Vector3(element.nx, element.ny, element.nz)
-					);
-				}
+			if (this.computeNormals) {
+				geometry.computeFaceNormals();
+				geometry.computeVertexNormals();
+				geometry.useNormals = true;
 			} else {
-				// We recompute normals at the end, so don't bother with whatever is in the file
+
+				if (geometry.normals.length > 0) {
+					geometry.useNormals = true;
+					for ( var i = 0; i < geometry.faces.length; i ++ ) {
+						geometry.faces[ i ].vertexNormals = [
+							geometry.normals[ geometry.faces[ i ].a ],
+							geometry.normals[ geometry.faces[ i ].b ],
+							geometry.normals[ geometry.faces[ i ].c ]
+						];
+					}
+				}
 			}
-			if ( 'red' in element && 'green' in element && 'blue' in element ) {
+			geometry.computeBoundingSphere();
 
-				geometry.useColor = true;
+			return geometry;
 
-				var color = new THREE.Color();
-				color.setRGB( element.red / 255.0, element.green / 255.0, element.blue / 255.0 );
-				geometry.colors.push( color );
+		}
 
-			}
-			// TODO: handle alpha
+		function handleElement( geometry, elementName, element ) {
 
-		} else if ( elementName === "face" ) {
+			if ( elementName === "vertex" ) {
 
-			var vertex_indices = element.vertex_indices;
-
-			if ( vertex_indices.length === 3 ) {
-
-				geometry.faces.push(
-					new THREE.Face3( vertex_indices[ 0 ], vertex_indices[ 1 ], vertex_indices[ 2 ] )
+				geometry.vertices.push(
+					new THREE.Vector3( element.x, element.y, element.z )
 				);
 
-			} else if ( vertex_indices.length === 4 ) {
+				if (!this.computeNormals) {
+					if ('nx' in element && 'ny' in element && 'nz' in element) {
+						geometry.normals.push(
+							new THREE.Vector3(element.nx, element.ny, element.nz)
+						);
+					}
+				} else {
+					// We recompute normals at the end, so don't bother with whatever is in the file
+				}
 
-				geometry.faces.push(
-					new THREE.Face3( vertex_indices[ 0 ], vertex_indices[ 1 ], vertex_indices[ 3 ] ),
-					new THREE.Face3( vertex_indices[ 1 ], vertex_indices[ 2 ], vertex_indices[ 3 ] )
-				);
+				if ( 'red' in element && 'green' in element && 'blue' in element ) {
+					// TODO: handle alpha
+
+					geometry.useColor = true;
+
+					var color = new THREE.Color();
+					color.setRGB( element.red / 255.0, element.green / 255.0, element.blue / 255.0 );
+					geometry.colors.push( color );
+
+			} else if ( elementName === "face" ) {
+
+				var vertex_indices = element.vertex_indices;
+				var texcoord = element.texcoord;
+
+				if ( vertex_indices.length === 3 ) {
+
+					geometry.faces.push(
+						new THREE.Face3( vertex_indices[ 0 ], vertex_indices[ 1 ], vertex_indices[ 2 ] )
+					);
+
+					if ( texcoord ) {
+						geometry.faceVertexUvs[ 0 ].push( [
+							new THREE.Vector2( texcoord[ 0 ], texcoord[ 1 ]),
+							new THREE.Vector2( texcoord[ 2 ], texcoord[ 3 ]),
+							new THREE.Vector2( texcoord[ 4 ], texcoord[ 5 ])
+						] );
+					}
+
+				} else if ( vertex_indices.length === 4 ) {
+
+					geometry.faces.push(
+						new THREE.Face3( vertex_indices[ 0 ], vertex_indices[ 1 ], vertex_indices[ 3 ] ),
+						new THREE.Face3( vertex_indices[ 1 ], vertex_indices[ 2 ], vertex_indices[ 3 ] )
+					);
+
+					if ( texcoord ) {
+						geometry.faceVertexUvs[ 0 ].push( [
+							new THREE.Vector2( texcoord[ 0 ], texcoord[ 1 ]),
+							new THREE.Vector2( texcoord[ 2 ], texcoord[ 3 ]),
+							new THREE.Vector2( texcoord[ 6 ], texcoord[ 7 ])
+						], [
+							new THREE.Vector2( texcoord[ 2 ], texcoord[ 3 ]),
+							new THREE.Vector2( texcoord[ 4 ], texcoord[ 5 ]),
+							new THREE.Vector2( texcoord[ 6 ], texcoord[ 7 ])
+						] );
+					}
+
+				}
 
 			}
 
 		}
 
-	},
+		function binaryRead( dataview, at, type, little_endian ) {
 
-	binaryRead: function ( dataview, at, type, little_endian ) {
+			switch ( type ) {
 
-		switch ( type ) {
-
-		// correspondences for non-specific length types here match reply:
-		case 'int8':		case 'char':	 return [ dataview.getInt8( at ), 1 ];
-
-		case 'uint8':		case 'uchar':	 return [ dataview.getUint8( at ), 1 ];
-
-		case 'int16':		case 'short':	 return [ dataview.getInt16( at, little_endian ), 2 ];
-
-		case 'uint16':	case 'ushort': return [ dataview.getUint16( at, little_endian ), 2 ];
-
-		case 'int32':		case 'int':		 return [ dataview.getInt32( at, little_endian ), 4 ];
-
-		case 'uint32':	case 'uint':	 return [ dataview.getUint32( at, little_endian ), 4 ];
-
-		case 'float32': case 'float':	 return [ dataview.getFloat32( at, little_endian ), 4 ];
-
-		case 'float64': case 'double': return [ dataview.getFloat64( at, little_endian ), 8 ];
+				// corespondences for non-specific length types here match rply:
+				case 'int8':		case 'char':	 return [ dataview.getInt8( at ), 1 ];
+				case 'uint8':		case 'uchar':	 return [ dataview.getUint8( at ), 1 ];
+				case 'int16':		case 'short':	 return [ dataview.getInt16( at, little_endian ), 2 ];
+				case 'uint16':	case 'ushort': return [ dataview.getUint16( at, little_endian ), 2 ];
+				case 'int32':		case 'int':		 return [ dataview.getInt32( at, little_endian ), 4 ];
+				case 'uint32':	case 'uint':	 return [ dataview.getUint32( at, little_endian ), 4 ];
+				case 'float32': case 'float':	 return [ dataview.getFloat32( at, little_endian ), 4 ];
+				case 'float64': case 'double': return [ dataview.getFloat64( at, little_endian ), 8 ];
 
 		}
 
-	},
+		function binaryReadElement( dataview, at, properties, little_endian ) {
 
-	binaryReadElement: function ( dataview, at, properties, little_endian ) {
+			var element = {};
+			var result, read = 0;
 
-		var element = Object();
-		var result, read = 0;
+			for ( var i = 0; i < properties.length; i ++ ) {
 
-		for ( var i = 0; i < properties.length; i ++ ) {
+				if ( properties[ i ].type === "list" ) {
 
-			if ( properties[ i ].type === "list" ) {
+					var list = [];
 
-				var list = [];
+					result = binaryRead( dataview, at + read, properties[ i ].countType, little_endian );
+					var n = result[ 0 ];
+					read += result[ 1 ];
 
-				result = this.binaryRead( dataview, at + read, properties[ i ].countType, little_endian );
-				var n = result[ 0 ];
-				read += result[ 1 ];
+					for ( var j = 0; j < n; j ++ ) {
 
-				for ( var j = 0; j < n; j ++ ) {
+						result = binaryRead( dataview, at + read, properties[ i ].itemType, little_endian );
+						list.push( result[ 0 ] );
+						read += result[ 1 ];
 
-					result = this.binaryRead( dataview, at + read, properties[ i ].itemType, little_endian );
-					list.push( result[ 0 ] );
+					}
+
+					element[ properties[ i ].name ] = list;
+
+				} else {
+
+					result = binaryRead( dataview, at + read, properties[ i ].type, little_endian );
+					element[ properties[ i ].name ] = result[ 0 ];
 					read += result[ 1 ];
 
 				}
 
-				element[ properties[ i ].name ] = list;
+			}
 
-			} else {
+			return [ element, read ];
 
-				result = this.binaryRead( dataview, at + read, properties[ i ].type, little_endian );
-				element[ properties[ i ].name ] = result[ 0 ];
-				read += result[ 1 ];
+		}
+
+		function parseBinary( data ) {
+
+			var geometry = new THREE.Geometry();
+			if (!this.computeNormals) {
+				geometry.normals = [];
+			}
+
+			var header = parseHeader( bin2str_header( data ) );
+			var little_endian = ( header.format === "binary_little_endian" );
+			var body = new DataView( data, header.headerLength );
+			var result, loc = 0;
+
+			for ( var currentElement = 0; currentElement < header.elements.length; currentElement ++ ) {
+
+				for ( var currentElementCount = 0; currentElementCount < header.elements[ currentElement ].count; currentElementCount ++ ) {
+
+					result = binaryReadElement( body, loc, header.elements[ currentElement ].properties, little_endian );
+					loc += result[ 1 ];
+					var element = result[ 0 ];
+
+					handleElement( geometry, header.elements[ currentElement ].name, element );
+
+				}
 
 			}
 
-		}
-
-		return [ element, read ];
-
-	},
-
-	parseBinary: function ( data ) {
-		var geometry = new THREE.Geometry();
-		if (!this.computeNormals) {
-			geometry.normals = [];
-		}
-
-		var header = this.parseHeader( this.bin2str_header( data ) );
-		var little_endian = ( header.format === "binary_little_endian" );
-		var body = new DataView( data, header.headerLength );
-		var result, loc = 0;
-
-		for ( var currentElement = 0; currentElement < header.elements.length; currentElement ++ ) {
-
-			for ( var currentElementCount = 0; currentElementCount < header.elements[ currentElement ].count; currentElementCount ++ ) {
-
-				result = this.binaryReadElement( body, loc, header.elements[ currentElement ].properties, little_endian );
-				loc += result[ 1 ];
-				var element = result[ 0 ];
-
-				this.handleElement( geometry, header.elements[ currentElement ].name, element );
-
-			}
+			return postProcess( geometry );
 
 		}
 
-		return this.postProcess( geometry );
+		//
+
+		console.time( 'PLYLoader' );
+
+		var geometry;
+		var scope = this;
+
+		if ( data instanceof ArrayBuffer ) {
+
+			geometry = isASCII( data ) ? parseASCII( bin2str( data ) ) : parseBinary( data );
+
+		} else {
+
+			geometry = parseASCII( data );
+
+		}
+
+		console.timeEnd( 'PLYLoader' );
+
+		return geometry;
 
 	}
 
