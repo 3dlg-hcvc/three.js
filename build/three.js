@@ -10908,11 +10908,7 @@ Object.assign( THREE.Geometry.prototype, THREE.EventDispatcher.prototype, {
 
 			}
 
-<<<<<<< HEAD
-					//console.warn( 'THREE.DirectGeometry.fromGeometry(): Undefined vertexUv ', i );  // NOTE(MS): Remove this since it fires on sparsely populated face uv arrays
-=======
 			if ( hasFaceVertexColor ) {
->>>>>>> upstream/master
 
 				var vertexColors = face.vertexColors;
 
@@ -11298,7 +11294,7 @@ Object.assign( THREE.DirectGeometry.prototype, THREE.EventDispatcher.prototype, 
 
 				} else {
 
-					console.warn( 'THREE.DirectGeometry.fromGeometry(): Undefined vertexUv ', i );
+					//console.warn( 'THREE.DirectGeometry.fromGeometry(): Undefined vertexUv ', i );  // NOTE(MS): Remove this since it fires on sparsely populated face uv arrays
 
 					this.uvs.push( new THREE.Vector2(), new THREE.Vector2(), new THREE.Vector2() );
 
@@ -14414,14 +14410,7 @@ THREE.AnimationObjectGroup.prototype = {
 						binding = new THREE.PropertyBinding(
 								object, paths[ j ], parsedPaths[ j ] );
 
-<<<<<<< HEAD
-// AXC: Added so THREE.js will report messages on deprecated stuff, but not so much!!!
-THREE.Loader.__reportedMessages = {};  
-
-THREE.Loader.prototype = {
-=======
 					}
->>>>>>> upstream/master
 
 					bindingsForPath[ firstActiveIndex ] = binding;
 
@@ -14482,12 +14471,7 @@ THREE.Loader.prototype = {
 
 				}
 
-<<<<<<< HEAD
-				var fullPath = texturePath + path;
-				var loader = THREE.Loader.Handlers.get( fullPath );        
-=======
 			}
->>>>>>> upstream/master
 
 		} // for arguments
 
@@ -14505,12 +14489,7 @@ THREE.Loader.prototype = {
 			bindings = this._bindings,
 			nBindings = bindings.length;
 
-<<<<<<< HEAD
-				}
- 				texture.name = path;  // AXC: Name of texture using path
-=======
 		for ( var i = 0, n = arguments.length; i !== n; ++ i ) {
->>>>>>> upstream/master
 
 			var object = arguments[ i ],
 				uuid = object.uuid,
@@ -14574,136 +14553,7 @@ THREE.Loader.prototype = {
 
 					}
 
-<<<<<<< HEAD
-				switch ( name ) {
-					case 'DbgColor':
-						json.color = value;
-						break;
-					case 'DbgIndex':
-					case 'opticalDensity':
-					case 'illumination':
-						// These were never supported
-						break;
-					case 'DbgName':
-						json.name = value;
-						break;
-					case 'blending':
-						json.blending = THREE[ value ];
-						break;
-					case 'colorDiffuse':
-						json.color = color.fromArray( value ).getHex();
-						break;
-					case 'colorSpecular':
-						json.specular = color.fromArray( value ).getHex();
-						break;
-					case 'colorEmissive':
-						json.emissive = color.fromArray( value ).getHex();
-						break;
-					case 'specularCoef':
-						json.shininess = value;
-						break;
-					case 'shading':
-						if ( value.toLowerCase() === 'basic' ) json.type = 'MeshBasicMaterial';
-						if ( value.toLowerCase() === 'phong' ) json.type = 'MeshPhongMaterial';
-						break;
-					case 'mapDiffuse':
-						json.map = loadTexture( value, m.mapDiffuseRepeat, m.mapDiffuseOffset, m.mapDiffuseWrap, m.mapDiffuseAnisotropy );
-						break;
-					case 'mapDiffuseRepeat':
-					case 'mapDiffuseOffset':
-					case 'mapDiffuseWrap':
-					case 'mapDiffuseAnisotropy':
-						break;
-					case 'mapLight':
-						json.lightMap = loadTexture( value, m.mapLightRepeat, m.mapLightOffset, m.mapLightWrap, m.mapLightAnisotropy );
-						break;
-					case 'mapLightRepeat':
-					case 'mapLightOffset':
-					case 'mapLightWrap':
-					case 'mapLightAnisotropy':
-						break;
-					case 'mapAO':
-						json.aoMap = loadTexture( value, m.mapAORepeat, m.mapAOOffset, m.mapAOWrap, m.mapAOAnisotropy );
-						break;
-					case 'mapAORepeat':
-					case 'mapAOOffset':
-					case 'mapAOWrap':
-					case 'mapAOAnisotropy':
-						break;
-					case 'mapBump':
-						json.bumpMap = loadTexture( value, m.mapBumpRepeat, m.mapBumpOffset, m.mapBumpWrap, m.mapBumpAnisotropy );
-						break;
-					case 'mapBumpScale':
-						json.bumpScale = value;
-						break;
-					case 'mapBumpRepeat':
-					case 'mapBumpOffset':
-					case 'mapBumpWrap':
-					case 'mapBumpAnisotropy':
-						break;
-					case 'mapNormal':
-						json.normalMap = loadTexture( value, m.mapNormalRepeat, m.mapNormalOffset, m.mapNormalWrap, m.mapNormalAnisotropy );
-						break;
-					case 'mapNormalFactor':
-						json.normalScale = [ value, value ];
-						break;
-					case 'mapNormalRepeat':
-					case 'mapNormalOffset':
-					case 'mapNormalWrap':
-					case 'mapNormalAnisotropy':
-						break;
-					case 'mapSpecular':
-						json.specularMap = loadTexture( value, m.mapSpecularRepeat, m.mapSpecularOffset, m.mapSpecularWrap, m.mapSpecularAnisotropy );
-						break;
-					case 'mapSpecularRepeat':
-					case 'mapSpecularOffset':
-					case 'mapSpecularWrap':
-					case 'mapSpecularAnisotropy':
-						break;
-					case 'mapAlpha':
-						json.alphaMap = loadTexture( value, m.mapAlphaRepeat, m.mapAlphaOffset, m.mapAlphaWrap, m.mapAlphaAnisotropy );
-						break;
-					case 'mapAlphaRepeat':
-					case 'mapAlphaOffset':
-					case 'mapAlphaWrap':
-					case 'mapAlphaAnisotropy':
-						break;
-					case 'flipSided':
-						json.side = THREE.BackSide;
-						break;
-					case 'doubleSided':
-						json.side = THREE.DoubleSide;
-						break;
-					case 'transparency':
-						if (!THREE.Loader.__reportedMessages['transparency renamed']) {   // AXC: Make reporting of these messages quieter
-							console.warn( 'THREE.Loader: transparency has been renamed to opacity' );
-							THREE.Loader.__reportedMessages['transparency renamed'] = true;
-						}              
-						json.opacity = value;
-						break;
-					case 'opacity':
-					case 'transparent':
-					case 'depthTest':
-					case 'depthWrite':
-					case 'transparent':
-					case 'visible':
-					case 'wireframe':
-						json[ name ] = value;
-						break;
-					case 'vertexColors':
-						if ( value === true ) json.vertexColors = THREE.VertexColors;
-						if ( value === 'face' ) json.vertexColors = THREE.FaceColors;
-						break;
-					default:
-						if (!THREE.Loader.__reportedMessages['unsupported ' + name]) {   // AXC: Make reporting of these messages quieter
-							console.error( 'Loader.createMaterial: Unsupported', name, value );
-							THREE.Loader.__reportedMessages['unsupported ' + name] = true;
-						}              
-						break;
-				}
-=======
 				} // cached or active
->>>>>>> upstream/master
 
 			} // if object is known
 
@@ -18132,6 +17982,9 @@ THREE.Loader = function () {
 
 };
 
+// AXC: Added so THREE.js will report messages on deprecated stuff, but not so much!!!
+THREE.Loader.__reportedMessages = {};  
+
 THREE.Loader.prototype = {
 
 	constructor: THREE.Loader,
@@ -18181,7 +18034,7 @@ THREE.Loader.prototype = {
 			function loadTexture( path, repeat, offset, wrap, anisotropy ) {
 
 				var fullPath = texturePath + path;
-				var loader = THREE.Loader.Handlers.get( fullPath );
+				var loader = THREE.Loader.Handlers.get( fullPath );        
 
 				var texture;
 
@@ -18195,6 +18048,7 @@ THREE.Loader.prototype = {
 					texture = textureLoader.load( fullPath );
 
 				}
+ 				texture.name = path;  // AXC: Name of texture using path
 
 				if ( repeat !== undefined ) {
 
@@ -18372,7 +18226,10 @@ THREE.Loader.prototype = {
 						json.side = THREE.DoubleSide;
 						break;
 					case 'transparency':
-						console.warn( 'THREE.Loader.createMaterial: transparency has been renamed to opacity' );
+						if (!THREE.Loader.__reportedMessages['transparency renamed']) {   // AXC: Make reporting of these messages quieter
+							console.warn( 'THREE.Loader.createMaterial: transparency has been renamed to opacity' );
+							THREE.Loader.__reportedMessages['transparency renamed'] = true;
+						}              
 						json.opacity = value;
 						break;
 					case 'depthTest':
@@ -18390,7 +18247,10 @@ THREE.Loader.prototype = {
 						if ( value === 'face' ) json.vertexColors = THREE.FaceColors;
 						break;
 					default:
-						console.error( 'THREE.Loader.createMaterial: Unsupported', name, value );
+						if (!THREE.Loader.__reportedMessages['unsupported ' + name]) {   // AXC: Make reporting of these messages quieter
+							console.error( 'THREE.Loader.createMaterial: Unsupported', name, value );
+							THREE.Loader.__reportedMessages['unsupported ' + name] = true;
+						}              
 						break;
 				}
 
@@ -18557,16 +18417,10 @@ Object.assign( THREE.XHRLoader.prototype, {
 
 	setResponseType: function ( value ) {
 
-<<<<<<< HEAD
-THREE.Points.prototype.clone = function (recursive) {
-
-	return new this.constructor( this.geometry, this.material ).copy( this, recursive );
-=======
 		this.responseType = value;
 		return this;
 
 	},
->>>>>>> upstream/master
 
 	setWithCredentials: function ( value ) {
 
@@ -18747,16 +18601,10 @@ Object.assign( THREE.JSONLoader.prototype, {
 
 				}
 
-<<<<<<< HEAD
-THREE.Line.prototype.clone = function (recursive) {
-
-	return new this.constructor( this.geometry, this.material ).copy( this, recursive );
-=======
 			}
 
 			var object = scope.parse( json, texturePath );
 			onLoad( object.geometry, object.materials );
->>>>>>> upstream/master
 
 		}, onProgress, onError );
 
@@ -19065,11 +18913,7 @@ THREE.Line.prototype.clone = function (recursive) {
 
 					if ( hasFaceVertexColor ) {
 
-<<<<<<< HEAD
-					if ( uvs && uvs[ f ]) {  // NOTE(MS): This check avoids error due to sparse uvs
-=======
 						for ( i = 0; i < 3; i ++ ) {
->>>>>>> upstream/master
 
 							colorIndex = faces[ offset ++ ];
 							face.vertexColors.push( new THREE.Color( colors[ colorIndex ] ) );
@@ -19090,15 +18934,9 @@ THREE.Line.prototype.clone = function (recursive) {
 
 			var influencesPerVertex = ( json.influencesPerVertex !== undefined ) ? json.influencesPerVertex : 2;
 
-<<<<<<< HEAD
-THREE.Mesh.prototype.clone = function (recursive) {
-
-	return new this.constructor( this.geometry, this.material ).copy( this, recursive );
-=======
 			if ( json.skinWeights ) {
 
 				for ( var i = 0, l = json.skinWeights.length; i < l; i += influencesPerVertex ) {
->>>>>>> upstream/master
 
 					var x =                               json.skinWeights[ i ];
 					var y = ( influencesPerVertex > 1 ) ? json.skinWeights[ i + 1 ] : 0;
@@ -19124,17 +18962,7 @@ THREE.Mesh.prototype.clone = function (recursive) {
 
 				}
 
-<<<<<<< HEAD
-THREE.Bone.prototype.copy = function ( source, recursive ) {
-	
-	THREE.Object3D.prototype.copy.call( this, source, recursive );
-	
-	this.skin = source.skin;
-	
-	return this;
-=======
 			}
->>>>>>> upstream/master
 
 			geometry.bones = json.bones;
 
@@ -19503,17 +19331,11 @@ Object.assign( THREE.MaterialLoader.prototype, {
 		if ( json.wireframe !== undefined ) material.wireframe = json.wireframe;
 		if ( json.wireframeLinewidth !== undefined ) material.wireframeLinewidth = json.wireframeLinewidth;
 
-<<<<<<< HEAD
-THREE.SkinnedMesh.prototype.clone = function(recursive) {
-
-	return new this.constructor( this.geometry, this.material, this.useVertexTexture ).copy( this, recursive );
-=======
 		// for PointsMaterial
 		if ( json.size !== undefined ) material.size = json.size;
 		if ( json.sizeAttenuation !== undefined ) material.sizeAttenuation = json.sizeAttenuation;
 
 		// maps
->>>>>>> upstream/master
 
 		if ( json.map !== undefined ) material.map = this.getTexture( json.map );
 
@@ -19823,11 +19645,6 @@ Object.assign( THREE.ObjectLoader.prototype, {
 					case 'LatheGeometry':
 					case 'LatheBufferGeometry':
 
-<<<<<<< HEAD
-THREE.Sprite.prototype.clone = function (recursive) {
-
-	return new this.constructor( this.material ).copy( this, recursive );
-=======
 						geometry = new THREE[ data.type ](
 							data.points,
 							data.segments,
@@ -19836,7 +19653,6 @@ THREE.Sprite.prototype.clone = function (recursive) {
 						);
 
 						break;
->>>>>>> upstream/master
 
 					case 'BufferGeometry':
 
@@ -19894,15 +19710,9 @@ THREE.Sprite.prototype.clone = function (recursive) {
 
 	},
 
-<<<<<<< HEAD
-THREE.LensFlare.prototype.copy = function ( source, recursive ) {
-
-	THREE.Object3D.prototype.copy.call( this, source, recursive );
-=======
 	parseAnimations: function ( json ) {
 
 		var animations = [];
->>>>>>> upstream/master
 
 		for ( var i = 0; i < json.length; i ++ ) {
 
@@ -22678,9 +22488,9 @@ THREE.Points.prototype = Object.assign( Object.create( THREE.Object3D.prototype 
 
 	}() ),
 
-	clone: function () {
+	clone: function (recursive) {
 
-		return new this.constructor( this.geometry, this.material ).copy( this );
+		return new this.constructor( this.geometry, this.material ).copy( this, recursive );
 
 	}
 
@@ -22863,9 +22673,9 @@ THREE.Line.prototype = Object.assign( Object.create( THREE.Object3D.prototype ),
 
 	}() ),
 
-	clone: function () {
+	clone: function (recursive) {
 
-		return new this.constructor( this.geometry, this.material ).copy( this );
+		return new this.constructor( this.geometry, this.material ).copy( this, recursive );
 
 	}
 
@@ -23213,7 +23023,7 @@ THREE.Mesh.prototype = Object.assign( Object.create( THREE.Object3D.prototype ),
 
 					if ( intersection ) {
 
-						if ( uvs ) {
+						if ( uvs && uvs[ f ]) {  // NOTE(MS): This check avoids error due to sparse uvs
 
 							var uvs_f = uvs[ f ];
 							uvA.copy( uvs_f[ 0 ] );
@@ -23238,9 +23048,9 @@ THREE.Mesh.prototype = Object.assign( Object.create( THREE.Object3D.prototype ),
 
 	}() ),
 
-	clone: function () {
+	clone: function (recursive) {
 
-		return new this.constructor( this.geometry, this.material ).copy( this );
+		return new this.constructor( this.geometry, this.material ).copy( this, recursive );
 
 	}
 
@@ -23268,9 +23078,9 @@ THREE.Bone.prototype = Object.assign( Object.create( THREE.Object3D.prototype ),
 
 	constructor: THREE.Bone,
 
-	copy: function ( source ) {
+	copy: function ( source, recursive ) {
 
-		THREE.Object3D.prototype.copy.call( this, source );
+		THREE.Object3D.prototype.copy.call( this, source, recursive );
 
 		this.skin = source.skin;
 
@@ -23637,9 +23447,9 @@ THREE.SkinnedMesh.prototype = Object.assign( Object.create( THREE.Mesh.prototype
 
 	},
 
-	clone: function() {
+	clone: function(recursive) {
 
-		return new this.constructor( this.geometry, this.material, this.skeleton.useVertexTexture ).copy( this );
+		return new this.constructor( this.geometry, this.material, this.skeleton.useVertexTexture ).copy( this, recursive );
 
 	}
 
@@ -23870,9 +23680,9 @@ THREE.Sprite.prototype = Object.assign( Object.create( THREE.Object3D.prototype 
 
 	}() ),
 
-	clone: function () {
+	clone: function (recursive) {
 
-		return new this.constructor( this.material ).copy( this );
+		return new this.constructor( this.material ).copy( this, recursive );
 
 	}
 
@@ -23906,9 +23716,9 @@ THREE.LensFlare.prototype = Object.assign( Object.create( THREE.Object3D.prototy
 
 	constructor: THREE.LensFlare,
 
-	copy: function ( source ) {
+	copy: function ( source, recursive ) {
 
-		THREE.Object3D.prototype.copy.call( this, source );
+		THREE.Object3D.prototype.copy.call( this, source, recursive );
 
 		this.positionScreen.copy( source.positionScreen );
 		this.customUpdateCallback = source.customUpdateCallback;

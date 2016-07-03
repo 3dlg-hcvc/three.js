@@ -275,14 +275,10 @@ THREE.Loader.prototype = {
 						if ( value === 'face' ) json.vertexColors = THREE.FaceColors;
 						break;
 					default:
-<<<<<<< HEAD
 						if (!THREE.Loader.__reportedMessages['unsupported ' + name]) {   // AXC: Make reporting of these messages quieter
-							console.error( 'Loader.createMaterial: Unsupported', name, value );
+							console.error( 'THREE.Loader.createMaterial: Unsupported', name, value );
 							THREE.Loader.__reportedMessages['unsupported ' + name] = true;
 						}              
-=======
-						console.error( 'THREE.Loader.createMaterial: Unsupported', name, value );
->>>>>>> upstream/master
 						break;
 				}
 

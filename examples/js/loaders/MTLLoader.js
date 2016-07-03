@@ -392,17 +392,14 @@ THREE.MTLLoader.MaterialCreator.prototype = {
 
 					// Diffuse color (color under white light) using RGB values
 
-<<<<<<< HEAD
-					params[ 'diffuse' ] = new THREE.Color().fromArray( value );
+					params.diffuse = new THREE.Color().fromArray( value );
 
 					break;
 
 				case 'ka':
 
 					// Ambient color (color under shadow) using RGB values
-=======
-					params.color = new THREE.Color().fromArray( value );
->>>>>>> upstream/master
+					params.ambient = new THREE.Color().fromArray( value );
 
 					break;
 
@@ -415,20 +412,13 @@ THREE.MTLLoader.MaterialCreator.prototype = {
 
 				case 'map_kd':
 
-					// Diffuse texture map
-<<<<<<< HEAD
-                                        // AXC: Allow for different url for textures than baseUrl
-					params[ 'map' ] = this.loadTexture( this.textureUrl + value );
-					params[ 'map' ].wrapS = this.wrap;
-					params[ 'map' ].wrapT = this.wrap;
-=======
-
 					if ( params.map ) break; // Keep the first encountered texture
 
-					params.map = this.loadTexture( resolveURL( this.baseUrl, value ) );
+					// Diffuse texture map
+					// AXC: Allow for different url for textures than baseUrl
+					params.map = this.loadTexture( this.textureUrl + value );
 					params.map.wrapS = this.wrap;
 					params.map.wrapT = this.wrap;
->>>>>>> upstream/master
 
 					break;
 
@@ -437,11 +427,7 @@ THREE.MTLLoader.MaterialCreator.prototype = {
 					// The specular exponent (defines the focus of the specular highlight)
 					// A high exponent results in a tight, concentrated highlight. Ns values normally range from 0 to 1000.
 
-<<<<<<< HEAD
-					params[ 'shininess' ] = value;
-=======
 					params.shininess = parseFloat( value );
->>>>>>> upstream/master
 
 					break;
 
@@ -472,19 +458,12 @@ THREE.MTLLoader.MaterialCreator.prototype = {
 
 					// Bump texture map
 
-<<<<<<< HEAD
-					if ( params[ 'bumpMap' ] ) break; // Avoid loading twice.
-                                        // AXC: Allow for different url for textures than baseUrl
-					params[ 'bumpMap' ] = this.loadTexture( this.textureUrl + value );
-					params[ 'bumpMap' ].wrapS = this.wrap;
-					params[ 'bumpMap' ].wrapT = this.wrap;
-=======
 					if ( params.bumpMap ) break; // Keep the first encountered texture
 
-					params.bumpMap = this.loadTexture( resolveURL( this.baseUrl, value ) );
+					// AXC: Allow for different url for textures than baseUrl
+					params.bumpMap = this.loadTexture( this.textureUrl + value );
 					params.bumpMap.wrapS = this.wrap;
 					params.bumpMap.wrapT = this.wrap;
->>>>>>> upstream/master
 
 					break;
 
@@ -495,9 +474,9 @@ THREE.MTLLoader.MaterialCreator.prototype = {
 
 		}
 
-		if ( params[ 'diffuse' ] ) {
+		if ( params.diffuse ) {
 
-			params[ 'color' ] = params[ 'diffuse' ];
+			params.color = params.diffuse;
 
 		}
 
