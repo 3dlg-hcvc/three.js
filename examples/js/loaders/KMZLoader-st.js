@@ -1,4 +1,4 @@
-require(["jszip-utils",
+define(["jszip-utils",
   "jszip"], function (JSZipUtils, JSZip) {
 
 THREE.KMZLoader = function() {
@@ -12,6 +12,9 @@ THREE.KMZLoader = function() {
       }
 
       var zip = new JSZip(data);
+      if (!zip.name) {
+        zip.name = url;
+      }
       var colladaFile = null;
       for (var filename in zip.files) {
         if (filename.endsWith(".dae")) {
@@ -46,18 +49,23 @@ THREE.ZippedColladaLoader = function (zip) {
     var path = getPath(basePath, relPath);
     var img = images[path];
     if (!img) {
-      var imageData = zip.file(path).asBinary();
-      // Base64 encode
-      var imageDataEncoded = btoa(imageData);
-      img = new Image();
-      // Let the file extension be the image type
-      var extIndex = relPath.lastIndexOf(".");
-      var imageType = (extIndex >= 0)? relPath.substring(extIndex+1): "jpg";
-      img.src = "data:image/" + imageType + ";base64," + imageDataEncoded;
-      // TODO: Refactor THREE.MTLLoader.ensurePowerOfTwo_ to utilities
-      img = THREE.MTLLoader.ensurePowerOfTwo_(img);
-      images[path] = img;
-      //document.getElementById("main").appendChild(img);
+      var imgfile = zip.file(path);
+      if (imgfile) {
+        var imageData = imgfile.asBinary();
+        // Base64 encode
+        var imageDataEncoded = btoa(imageData);
+        img = new Image();
+        // Let the file extension be the image type
+        var extIndex = relPath.lastIndexOf(".");
+        var imageType = (extIndex >= 0) ? relPath.substring(extIndex + 1) : "jpg";
+        img.src = "data:image/" + imageType + ";base64," + imageDataEncoded;
+        // TODO: Refactor THREE.MTLLoader.ensurePowerOfTwo_ to utilities
+        img = THREE.MTLLoader.ensurePowerOfTwo_(img);
+        images[path] = img;
+        //document.getElementById("main").appendChild(img);
+      } else {
+        console.error('Error getting image ' + path + ' from ' + zip.name);
+      }
     }
     var texture = new THREE.Texture();
     texture.image = img;

@@ -30,8 +30,8 @@ THREE.OBJMTLLoader.prototype = {
 		var mtlLoader = new THREE.MTLLoader( this.manager );
 		mtlLoader.setBaseUrl( url.substr( 0, url.lastIndexOf( "/" ) + 1 ) );
 		mtlLoader.setCrossOrigin( this.crossOrigin );
-		// AXC: Set material options
-		mtlLoader.setMaterialOptions( options );
+    // AXC: Set material options
+    mtlLoader.setMaterialOptions( options );
 
 		// AXC: Redo load so relative MTL references from OBJ file are okay
 		function applyMaterials(object, materialsCreator) {
@@ -55,46 +55,47 @@ THREE.OBJMTLLoader.prototype = {
 			}, onProgress, onError );
 		}
 
-		function loadObjWithMTLCallback() {
-			var hasMtl = false;
-			var object = null;
-			var materialsCreator = null;
-			function mtllibCallback(mtlfile) {
-				hasMtl = true;
-				mtlLoader.load(mtlLoader.baseUrl + mtlfile, function (materials) {
-					var mc = materials;
-					mc.preload();
-					if (object) {
-						applyMaterials(object, mc);
-						onLoad(object);
-					}
-					materialsCreator = mc;
-				}, onProgress, onError);
-			}
-			var loader = new THREE.XHRLoader(scope.manager);
-			loader.setCrossOrigin(scope.crossOrigin);
-			loader.load(url, function (text) {
-				object = scope.parse(text, mtllibCallback, options);
-				if (hasMtl) {
-					if (materialsCreator) {
-						applyMaterials(object, materialsCreator);
-						onLoad(object);
-					}
-				} else {
-					onLoad(object);
+			function loadObjWithMTLCallback() {
+				var hasMtl = false;
+				var object = null;
+				var materialsCreator = null;
+				function mtllibCallback(mtlfile) {
+					hasMtl = true;
+					mtlLoader.load(mtlLoader.baseUrl + mtlfile, function (materials) {
+						var mc = materials;
+						mc.preload();
+						if (object) {
+							applyMaterials(object, mc);
+							onLoad(object);
+						}
+						materialsCreator = mc;
+					}, onProgress, onError);
 				}
-			}, onProgress, onError);
-		};
+				var loader = new THREE.XHRLoader(scope.manager);
+				loader.setCrossOrigin(scope.crossOrigin);
+				loader.load(url, function (text) {
+					object = scope.parse(text, mtllibCallback, options);
+					if (hasMtl) {
+						if (materialsCreator) {
+							applyMaterials(object, materialsCreator);
+							onLoad(object);
+						}
+					} else {
+						onLoad(object);
+					}
+				}, onProgress, onError);
+			};
 
-		if (mtlurl) {
-			mtlLoader.load(mtlurl, function (materials) {
-				var materialsCreator = materials;
-				materialsCreator.preload();
-				loadObj(materialsCreator);
-			}, onProgress, onError);
-		} else {
-			loadObjWithMTLCallback();
-		}	
+			if (mtlurl) {
+				mtlLoader.load(mtlurl, function (materials) {
+					var materialsCreator = materials;
+					materialsCreator.preload();
+					loadObj(materialsCreator);
+				}, onProgress, onError);
+			} else {
+				loadObjWithMTLCallback();
+			}
+
 	},
 
 	setCrossOrigin: function ( value ) {
@@ -127,7 +128,7 @@ THREE.OBJMTLLoader.prototype = {
 
 		function uv( u, v ) {
 
-			return new THREE.Vector2( u, v );
+			return new THREE.Vector2( isFinite(u) ? u : 0, isFinite(v) ? v : 0 );
 
 		}
 
@@ -144,32 +145,32 @@ THREE.OBJMTLLoader.prototype = {
 			if ( vertices.length > 0 && geometry.faces.length > 0 ) {
 
 				geometry.vertices = vertices;
-				geometry.colors = colors;
+                                geometry.colors = colors;
 
 				geometry.mergeVertices();
 				geometry.computeFaceNormals();
 				geometry.computeBoundingSphere();
 
-				if (options.useBuffers) {
-					var bufferGeom = new THREE.BufferGeometry();
-					bufferGeom.fromGeometry(geometry);
-					mesh.geometry = bufferGeom;
-				}
+                if (options.useBuffers) {
+                    var bufferGeom = new THREE.BufferGeometry();
+                    bufferGeom.fromGeometry(geometry);
+                    mesh.geometry = bufferGeom;
+                }
 
 				object.add( mesh );
 
 				geometry = new THREE.Geometry();
 				mesh = new THREE.Mesh( geometry, material );
-				meshCount++;
+                meshCount++;
 			}
 
 			if ( meshName !== undefined ) mesh.name = meshName;
-			else if (mesh.name === undefined) {
-				mesh.name = 'mesh' + meshCount;
-			}
-			mesh.userData = {
-				index: meshCount
-			};
+            else if (mesh.name === undefined) {
+                mesh.name = 'mesh' + meshCount;
+            }
+            mesh.userData = {
+                index: meshCount
+            };
 
 			if ( materialName !== undefined ) {
 
@@ -188,12 +189,12 @@ THREE.OBJMTLLoader.prototype = {
 		var geometry = new THREE.Geometry();
 		var material = new THREE.MeshLambertMaterial();
 		var mesh = new THREE.Mesh( geometry, material );
-		var meshCount = 0;
+        var meshCount = 0;
 
 		var vertices = [];
 		var normals = [];
 		var uvs = [];
-		var colors = [];
+    var colors = [];
 
 		function add_face( a, b, c, normals_inds ) {
 
@@ -232,10 +233,14 @@ THREE.OBJMTLLoader.prototype = {
 
 		function add_uvs( a, b, c ) {
 
+			var zero = new THREE.Vector2(0, 0);
+			var uva = uvs[ parseInt( a ) - 1 ] || zero;
+			var uvb = uvs[ parseInt( b ) - 1 ] || zero;
+			var uvc = uvs[ parseInt( c ) - 1 ] || zero;
 			geometry.faceVertexUvs[ 0 ].push( [
-				uvs[ parseInt( a ) - 1 ].clone(),
-				uvs[ parseInt( b ) - 1 ].clone(),
-				uvs[ parseInt( c ) - 1 ].clone()
+				uva.clone(),
+				uvb.clone(),
+				uvc.clone()
 			] );
 
 		}
@@ -246,7 +251,7 @@ THREE.OBJMTLLoader.prototype = {
 
 				add_face( faces[ 0 ], faces[ 1 ], faces[ 2 ], normals_inds );
 
-				if ( ! ( uvs === undefined ) && uvs.length > 0 ) {
+				if ( ! ( uvs === undefined ) && uvs.length > 3 ) {
 
 					add_uvs( uvs[ 0 ], uvs[ 1 ], uvs[ 2 ] );
 
@@ -422,7 +427,7 @@ THREE.OBJMTLLoader.prototype = {
 				meshN();
 				face_offset = face_offset + vertices.length;
 				vertices = [];
-				colors = [];
+        colors = [];
 				object = new THREE.Object3D();
 				object.name = line.substring( 2 ).trim();
 				group.add( object );
@@ -469,7 +474,7 @@ THREE.OBJMTLLoader.prototype = {
 				}
 			} else {
 
-				console.log( "THREE.OBJMTLLoader: Unhandled line " + line );
+				console.log( "THREE.OBJMTLLoader: Unhandled line: " + line );
 
 			}
 

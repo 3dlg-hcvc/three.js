@@ -359,13 +359,26 @@ THREE.PLYLoader.prototype = {
 
 			}
 
-			geometry.elementsNeedUpdate = true;
+			geometry.colorsNeedUpdate = true;
 
 		}
 
 		if (this.computeNormals) {
 			geometry.computeFaceNormals();
 			geometry.computeVertexNormals();
+			geometry.useNormals = true;
+		} else {
+
+			if (geometry.normals.length > 0) {
+				geometry.useNormals = true;
+				for ( var i = 0; i < geometry.faces.length; i ++ ) {
+					geometry.faces[ i ].vertexNormals = [
+						geometry.normals[ geometry.faces[ i ].a ],
+						geometry.normals[ geometry.faces[ i ].b ],
+						geometry.normals[ geometry.faces[ i ].c ]
+					];
+				}
+			}
 		}
 		geometry.computeBoundingSphere();
 
@@ -381,12 +394,15 @@ THREE.PLYLoader.prototype = {
 				new THREE.Vector3( element.x, element.y, element.z )
 			);
 
-			// We recompute normals at the end
-			//if ( 'nx' in element && 'ny' in element && 'nz' in element ) {
-		 	//	geometry.normals.push(
-			//		new THREE.Vector3( element.nx, element.ny, element.nz )
-			//	);
-			//}
+			if (!this.computeNormals) {
+				if ('nx' in element && 'ny' in element && 'nz' in element) {
+					geometry.normals.push(
+						new THREE.Vector3(element.nx, element.ny, element.nz)
+					);
+				}
+			} else {
+				// We recompute normals at the end, so don't bother with whatever is in the file
+			}
 			if ( 'red' in element && 'green' in element && 'blue' in element ) {
 
 				geometry.useColor = true;
@@ -425,7 +441,7 @@ THREE.PLYLoader.prototype = {
 
 		switch ( type ) {
 
-			// corespondences for non-specific length types here match rply:
+		// correspondences for non-specific length types here match reply:
 		case 'int8':		case 'char':	 return [ dataview.getInt8( at ), 1 ];
 
 		case 'uint8':		case 'uchar':	 return [ dataview.getUint8( at ), 1 ];
@@ -487,7 +503,9 @@ THREE.PLYLoader.prototype = {
 
 	parseBinary: function ( data ) {
 		var geometry = new THREE.Geometry();
-		//geometry.normals = [];
+		if (!this.computeNormals) {
+			geometry.normals = [];
+		}
 
 		var header = this.parseHeader( this.bin2str_header( data ) );
 		var little_endian = ( header.format === "binary_little_endian" );
