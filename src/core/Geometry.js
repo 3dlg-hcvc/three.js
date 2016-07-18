@@ -1103,7 +1103,7 @@ THREE.Geometry.prototype = {
 
 	clone: function () {
 
-		return new this.constructor().copy( this );
+		return new THREE.Geometry().copy( this );
 
 	},
 
@@ -1141,9 +1141,13 @@ THREE.Geometry.prototype = {
 
 			for ( var j = 0, jl = faceVertexUvs.length; j < jl; j ++ ) {
 
-				var uvs = faceVertexUvs[ j ], uvsCopy = [];
+				var uvs = faceVertexUvs[ j ];
+
+				// NOTE(AXC): This check avoids error due to sparse uvs
 
 				if (uvs) {
+
+					var uvsCopy = [];
 
 					for ( var k = 0, kl = uvs.length; k < kl; k ++ ) {
 
@@ -1153,9 +1157,9 @@ THREE.Geometry.prototype = {
 
 					}
 
-				}
+					this.faceVertexUvs[ i ][ j ] = uvsCopy;
 
-				this.faceVertexUvs[ i ].push( uvsCopy );
+				}
 
 			}
 
