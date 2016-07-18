@@ -1143,11 +1143,15 @@ THREE.Geometry.prototype = {
 
 				var uvs = faceVertexUvs[ j ], uvsCopy = [];
 
-				for ( var k = 0, kl = uvs.length; k < kl; k ++ ) {
+				if (uvs) {
 
-					var uv = uvs[ k ];
+					for ( var k = 0, kl = uvs.length; k < kl; k ++ ) {
 
-					uvsCopy.push( uv.clone() );
+						var uv = uvs[ k ];
+
+						uvsCopy.push( uv.clone() );
+
+					}
 
 				}
 
