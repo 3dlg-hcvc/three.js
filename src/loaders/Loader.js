@@ -257,7 +257,11 @@ THREE.Loader.prototype = {
 
 			}
 
-			if ( json.type !== 'MeshPhongMaterial' ) delete json.specular;
+			if ( json.type !== 'MeshPhongMaterial' && (json.specular !== undefined)) {
+				json.type = 'MeshPhongMaterial';
+			} else if (json.type !== 'MeshPhongMaterial') {
+				delete json.specular;
+			}
 			if ( json.opacity < 1 ) json.transparent = true;
 
 			materialLoader.setTextures( textures );
