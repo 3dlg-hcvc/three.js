@@ -746,9 +746,15 @@ Sidebar.Material = function ( editor ) {
 
 				}
 
-				if ( material.reflectivity !== materialReflectivity.getValue() ) {
+			}
 
-					editor.execute( new SetMaterialValueCommand( currentObject, 'reflectivity', materialReflectivity.getValue() ) );
+			if ( material.reflectivity !== undefined ) {
+
+				var reflectivity = materialReflectivity.getValue();
+
+				if ( material.reflectivity !== reflectivity ) {
+
+					editor.execute( new SetMaterialValueCommand( currentObject, 'reflectivity', reflectivity ) );
 
 				}
 
@@ -887,9 +893,7 @@ Sidebar.Material = function ( editor ) {
 
 			}
 
-			refreshUI( false );
-
-			signals.materialChanged.dispatch( material );
+			refreshUI();
 
 		}
 
@@ -1125,6 +1129,10 @@ Sidebar.Material = function ( editor ) {
 				materialEnvMap.setValue( material.envMap );
 
 			}
+
+		}
+
+		if ( material.reflectivity !== undefined ) {
 
 			materialReflectivity.setValue( material.reflectivity );
 

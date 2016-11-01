@@ -1,4 +1,11 @@
-THREE.WebGLPrograms = function ( renderer, capabilities ) {
+/**
+ * @author mrdoob / http://mrdoob.com/
+ */
+
+import { WebGLProgram } from './WebGLProgram';
+import { BackSide, DoubleSide, FlatShading, CubeUVRefractionMapping, CubeUVReflectionMapping, GammaEncoding, LinearEncoding } from '../../constants';
+
+function WebGLPrograms( renderer, capabilities ) {
 
 	var programs = [];
 
@@ -25,11 +32,11 @@ THREE.WebGLPrograms = function ( renderer, capabilities ) {
 		"maxMorphTargets", "maxMorphNormals", "premultipliedAlpha",
 		"numDirLights", "numPointLights", "numSpotLights", "numHemiLights",
 		"shadowMapEnabled", "shadowMapType", "toneMapping", 'physicallyCorrectLights',
-		"alphaTest", "doubleSided", "flipSided", "numClippingPlanes", "depthPacking"
+		"alphaTest", "doubleSided", "flipSided", "numClippingPlanes", "numClipIntersection", "depthPacking"
 	];
 
 
-	function allocateBones ( object ) {
+	function allocateBones( object ) {
 
 		if ( capabilities.floatVertexTextures && object && object.skeleton && object.skeleton.useVertexTexture ) {
 
@@ -49,7 +56,7 @@ THREE.WebGLPrograms = function ( renderer, capabilities ) {
 
 			var maxBones = nVertexMatrices;
 
-			if ( object !== undefined && object instanceof THREE.SkinnedMesh ) {
+			if ( object !== undefined && (object && object.isSkinnedMesh) ) {
 
 				maxBones = Math.min( object.skeleton.bones.length, maxBones );
 
@@ -73,13 +80,13 @@ THREE.WebGLPrograms = function ( renderer, capabilities ) {
 
 		if ( ! map ) {
 
-			encoding = THREE.LinearEncoding;
+			encoding = LinearEncoding;
 
-		} else if ( map instanceof THREE.Texture ) {
+		} else if ( (map && map.isTexture) ) {
 
 			encoding = map.encoding;
 
-		} else if ( map instanceof THREE.WebGLRenderTarget ) {
+		} else if ( (map && map.isWebGLRenderTarget) ) {
 
 			console.warn( "THREE.WebGLPrograms.getTextureEncodingFromMap: don't use render targets as textures. Use their .texture property instead." );
 			encoding = map.texture.encoding;
@@ -87,9 +94,9 @@ THREE.WebGLPrograms = function ( renderer, capabilities ) {
 		}
 
 		// add backwards compatibility for WebGLRenderer.gammaInput/gammaOutput parameter, should probably be removed at some point.
-		if ( encoding === THREE.LinearEncoding && gammaOverrideLinear ) {
+		if ( encoding === LinearEncoding && gammaOverrideLinear ) {
 
-			encoding = THREE.GammaEncoding;
+			encoding = GammaEncoding;
 
 		}
 
@@ -97,7 +104,7 @@ THREE.WebGLPrograms = function ( renderer, capabilities ) {
 
 	}
 
-	this.getParameters = function ( material, lights, fog, nClipPlanes, object ) {
+	this.getParameters = function ( material, lights, fog, nClipPlanes, nClipIntersection, object ) {
 
 		var shaderID = shaderIDs[ material.type ];
 
@@ -133,7 +140,7 @@ THREE.WebGLPrograms = function ( renderer, capabilities ) {
 			envMap: !! material.envMap,
 			envMapMode: material.envMap && material.envMap.mapping,
 			envMapEncoding: getTextureEncodingFromMap( material.envMap, renderer.gammaInput ),
-			envMapCubeUV: ( !! material.envMap ) && ( ( material.envMap.mapping === THREE.CubeUVReflectionMapping ) || ( material.envMap.mapping === THREE.CubeUVRefractionMapping ) ),
+			envMapCubeUV: ( !! material.envMap ) && ( ( material.envMap.mapping === CubeUVReflectionMapping ) || ( material.envMap.mapping === CubeUVRefractionMapping ) ),
 			lightMap: !! material.lightMap,
 			aoMap: !! material.aoMap,
 			emissiveMap: !! material.emissiveMap,
@@ -150,11 +157,11 @@ THREE.WebGLPrograms = function ( renderer, capabilities ) {
 
 			vertexColors: material.vertexColors,
 
-			fog: fog,
+			fog: !! fog,
 			useFog: material.fog,
-			fogExp: fog instanceof THREE.FogExp2,
+			fogExp: (fog && fog.isFogExp2),
 
-			flatShading: material.shading === THREE.FlatShading,
+			flatShading: material.shading === FlatShading,
 
 			sizeAttenuation: material.sizeAttenuation,
 			logarithmicDepthBuffer: capabilities.logarithmicDepthBuffer,
@@ -174,6 +181,7 @@ THREE.WebGLPrograms = function ( renderer, capabilities ) {
 			numHemiLights: lights.hemi.length,
 
 			numClippingPlanes: nClipPlanes,
+			numClipIntersection: nClipIntersection,
 
 			shadowMapEnabled: renderer.shadowMap.enabled && object.receiveShadow && lights.shadows.length > 0,
 			shadowMapType: renderer.shadowMap.type,
@@ -184,8 +192,8 @@ THREE.WebGLPrograms = function ( renderer, capabilities ) {
 			premultipliedAlpha: material.premultipliedAlpha,
 
 			alphaTest: material.alphaTest,
-			doubleSided: material.side === THREE.DoubleSide,
-			flipSided: material.side === THREE.BackSide,
+			doubleSided: material.side === DoubleSide,
+			flipSided: material.side === BackSide,
 
 			depthPacking: ( material.depthPacking !== undefined ) ? material.depthPacking : false
 
@@ -253,7 +261,7 @@ THREE.WebGLPrograms = function ( renderer, capabilities ) {
 
 		if ( program === undefined ) {
 
-			program = new THREE.WebGLProgram( renderer, code, material, parameters );
+			program = new WebGLProgram( renderer, code, material, parameters );
 			programs.push( program );
 
 		}
@@ -281,4 +289,7 @@ THREE.WebGLPrograms = function ( renderer, capabilities ) {
 	// Exposed for resource monitoring & error feedback via renderer.info:
 	this.programs = programs;
 
-};
+}
+
+
+export { WebGLPrograms };

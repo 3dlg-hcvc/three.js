@@ -1,21 +1,27 @@
+import { FaceColors, VertexColors, DoubleSide, BackSide, MirroredRepeatWrapping, RepeatWrapping, BlendingMode } from '../constants';
+import { _Math } from '../math/Math';
+import { MaterialLoader } from './MaterialLoader';
+import { TextureLoader } from './TextureLoader';
+import { Color } from '../math/Color';
+
 /**
  * @author alteredq / http://alteredqualia.com/
  */
 
-THREE.Loader = function () {
+function Loader() {
 
 	this.onLoadStart = function () {};
 	this.onLoadProgress = function () {};
 	this.onLoadComplete = function () {};
 
-};
+}
 
 // AXC: Added so THREE.js will report messages on deprecated stuff, but not so much!!!
-THREE.Loader.__reportedMessages = {};  
+Loader.__reportedMessages = {};
 
-THREE.Loader.prototype = {
+Loader.prototype = {
 
-	constructor: THREE.Loader,
+	constructor: Loader,
 
 	crossOrigin: undefined,
 
@@ -51,9 +57,9 @@ THREE.Loader.prototype = {
 
 		return function createMaterial( m, texturePath, crossOrigin ) {
 
-			if ( color === undefined ) color = new THREE.Color();
-			if ( textureLoader === undefined ) textureLoader = new THREE.TextureLoader();
-			if ( materialLoader === undefined ) materialLoader = new THREE.MaterialLoader();
+			if ( color === undefined ) color = new Color();
+			if ( textureLoader === undefined ) textureLoader = new TextureLoader();
+			if ( materialLoader === undefined ) materialLoader = new MaterialLoader();
 
 			// convert from old material format
 
@@ -62,7 +68,7 @@ THREE.Loader.prototype = {
 			function loadTexture( path, repeat, offset, wrap, anisotropy ) {
 
 				var fullPath = texturePath + path;
-				var loader = THREE.Loader.Handlers.get( fullPath );        
+				var loader = Loader.Handlers.get( fullPath );
 
 				var texture;
 
@@ -82,8 +88,8 @@ THREE.Loader.prototype = {
 
 					texture.repeat.fromArray( repeat );
 
-					if ( repeat[ 0 ] !== 1 ) texture.wrapS = THREE.RepeatWrapping;
-					if ( repeat[ 1 ] !== 1 ) texture.wrapT = THREE.RepeatWrapping;
+					if ( repeat[ 0 ] !== 1 ) texture.wrapS = RepeatWrapping;
+					if ( repeat[ 1 ] !== 1 ) texture.wrapT = RepeatWrapping;
 
 				}
 
@@ -95,11 +101,11 @@ THREE.Loader.prototype = {
 
 				if ( wrap !== undefined ) {
 
-					if ( wrap[ 0 ] === 'repeat' ) texture.wrapS = THREE.RepeatWrapping;
-					if ( wrap[ 0 ] === 'mirror' ) texture.wrapS = THREE.MirroredRepeatWrapping;
+					if ( wrap[ 0 ] === 'repeat' ) texture.wrapS = RepeatWrapping;
+					if ( wrap[ 0 ] === 'mirror' ) texture.wrapS = MirroredRepeatWrapping;
 
-					if ( wrap[ 1 ] === 'repeat' ) texture.wrapT = THREE.RepeatWrapping;
-					if ( wrap[ 1 ] === 'mirror' ) texture.wrapT = THREE.MirroredRepeatWrapping;
+					if ( wrap[ 1 ] === 'repeat' ) texture.wrapT = RepeatWrapping;
+					if ( wrap[ 1 ] === 'mirror' ) texture.wrapT = MirroredRepeatWrapping;
 
 				}
 
@@ -109,7 +115,7 @@ THREE.Loader.prototype = {
 
 				}
 
-				var uuid = THREE.Math.generateUUID();
+				var uuid = _Math.generateUUID();
 
 				textures[ uuid ] = texture;
 
@@ -120,7 +126,7 @@ THREE.Loader.prototype = {
 			//
 
 			var json = {
-				uuid: THREE.Math.generateUUID(),
+				uuid: _Math.generateUUID(),
 				type: 'MeshLambertMaterial'
 			};
 
@@ -138,7 +144,7 @@ THREE.Loader.prototype = {
 						json.name = value;
 						break;
 					case 'blending':
-						json.blending = THREE[ value ];
+						json.blending = BlendingMode[ value ];
 						break;
 					case 'colorAmbient':
 					case 'mapAmbient':
@@ -248,10 +254,10 @@ THREE.Loader.prototype = {
 					case 'mapAlphaAnisotropy':
 						break;
 					case 'flipSided':
-						json.side = THREE.BackSide;
+						json.side = BackSide;
 						break;
 					case 'doubleSided':
-						json.side = THREE.DoubleSide;
+						json.side = DoubleSide;
 						break;
 					case 'transparency':
 						if (!THREE.Loader.__reportedMessages['transparency renamed']) {   // AXC: Make reporting of these messages quieter
@@ -271,8 +277,8 @@ THREE.Loader.prototype = {
 						json[ name ] = value;
 						break;
 					case 'vertexColors':
-						if ( value === true ) json.vertexColors = THREE.VertexColors;
-						if ( value === 'face' ) json.vertexColors = THREE.FaceColors;
+						if ( value === true ) json.vertexColors = VertexColors;
+						if ( value === 'face' ) json.vertexColors = FaceColors;
 						break;
 					default:
 						if (!THREE.Loader.__reportedMessages['unsupported ' + name]) {   // AXC: Make reporting of these messages quieter
@@ -299,7 +305,7 @@ THREE.Loader.prototype = {
 
 };
 
-THREE.Loader.Handlers = {
+Loader.Handlers = {
 
 	handlers: [],
 
@@ -331,3 +337,6 @@ THREE.Loader.Handlers = {
 	}
 
 };
+
+
+export { Loader };

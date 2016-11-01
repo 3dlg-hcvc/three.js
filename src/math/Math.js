@@ -3,7 +3,7 @@
  * @author mrdoob / http://mrdoob.com/
  */
 
-THREE.Math = {
+var _Math = {
 
 	DEG2RAD: Math.PI / 180,
 	RAD2DEG: 180 / Math.PI,
@@ -68,6 +68,14 @@ THREE.Math = {
 
 	},
 
+	// https://en.wikipedia.org/wiki/Linear_interpolation
+
+	lerp: function ( x, y, t ) {
+
+		return ( 1 - t ) * x + t * y;
+
+	},
+
 	// http://en.wikipedia.org/wiki/Smoothstep
 
 	smoothstep: function ( x, min, max ) {
@@ -125,13 +133,13 @@ THREE.Math = {
 
 	degToRad: function ( degrees ) {
 
-		return degrees * THREE.Math.DEG2RAD;
+		return degrees * _Math.DEG2RAD;
 
 	},
 
 	radToDeg: function ( radians ) {
 
-		return radians * THREE.Math.RAD2DEG;
+		return radians * _Math.RAD2DEG;
 
 	},
 
@@ -162,3 +170,6 @@ THREE.Math = {
 	}
 
 };
+
+
+export { _Math };
