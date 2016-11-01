@@ -347,6 +347,8 @@ THREE.OrbitControls = function ( object, domElement ) {
 
 			var element = scope.domElement === document ? scope.domElement.body : scope.domElement;
 
+			scope.panRequiresShift = false;
+
 			if ( scope.object instanceof THREE.PerspectiveCamera ) {
 
 				// perspective
@@ -361,14 +363,7 @@ THREE.OrbitControls = function ( object, domElement ) {
 				panLeft( 2 * deltaX * targetDistance / element.clientHeight, scope.object.matrix );
 				panUp( 2 * deltaY * targetDistance / element.clientHeight, scope.object.matrix );
 
-<<<<<<< HEAD
-		this.panRequiresShift = false;
-
-		////////////
-		// internals
-=======
 			} else if ( scope.object instanceof THREE.OrthographicCamera ) {
->>>>>>> upstream/master
 
 				// orthographic
 				panLeft( deltaX * ( scope.object.right - scope.object.left ) / scope.object.zoom / element.clientWidth, scope.object.matrix );
@@ -452,14 +447,7 @@ THREE.OrbitControls = function ( object, domElement ) {
 
 		//console.log( 'handleMouseDownPan' );
 
-<<<<<<< HEAD
-      // NOTE(MS): Allow setting of Shift as modifier for panning
-			var isPan = (event.button === scope.mouseButtons.PAN) && (!scope.panRequiresShift || event.shiftKey);
-
-			if ( event.button === scope.mouseButtons.ORBIT && !isPan) {
-=======
 		panStart.set( event.clientX, event.clientY );
->>>>>>> upstream/master
 
 	}
 
@@ -478,11 +466,7 @@ THREE.OrbitControls = function ( object, domElement ) {
 		// rotating up and down along whole screen attempts to go 360, but limited to 180
 		rotateUp( 2 * Math.PI * rotateDelta.y / element.clientHeight * scope.rotateSpeed );
 
-<<<<<<< HEAD
-			} else if ( isPan ) {
-=======
 		rotateStart.copy( rotateEnd );
->>>>>>> upstream/master
 
 		scope.update();
 
@@ -710,6 +694,9 @@ THREE.OrbitControls = function ( object, domElement ) {
 			state = STATE.DOLLY;
 
 		} else if ( event.button === scope.mouseButtons.PAN ) {
+
+			// NOTE(MS): Allow setting of Shift as modifier for panning
+			if ( scope.panRequiresShift && !event.shiftKey ) return;
 
 			if ( scope.enablePan === false ) return;
 
