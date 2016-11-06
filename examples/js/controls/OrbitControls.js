@@ -155,17 +155,6 @@ THREE.OrbitControls = function ( object, domElement ) {
 
 			spherical.radius *= scale;
 
-			} else if (THREE.CombinedCamera && scope.object instanceof THREE.CombinedCamera) {
-
-				if ( scope.object.inPerspectiveMode) {
-					scale /= dollyScale;
-				} else {
-					scope.object.zoom = Math.max(this.minZoom, Math.min(this.maxZoom, this.object.zoom * dollyScale));
-					scope.object.updateProjectionMatrix();
-					zoomChanged = true;
-				}
-
-			} else {
 			// restrict radius to be between desired limits
 			spherical.radius = Math.max( scope.minDistance, Math.min( scope.maxDistance, spherical.radius ) );
 
@@ -185,16 +174,6 @@ THREE.OrbitControls = function ( object, domElement ) {
 
 				sphericalDelta.theta *= ( 1 - scope.dampingFactor );
 				sphericalDelta.phi *= ( 1 - scope.dampingFactor );
-
-			} else if (THREE.CombinedCamera && scope.object instanceof THREE.CombinedCamera) {
-
-				if ( scope.object.inPerspectiveMode) {
-					scale *= dollyScale;
-				} else {
-					scope.object.zoom = Math.max(this.minZoom, Math.min(this.maxZoom, this.object.zoom / dollyScale));
-					scope.object.updateProjectionMatrix();
-					zoomChanged = true;
-				}
 
 			} else {
 
