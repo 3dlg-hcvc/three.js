@@ -359,24 +359,6 @@ THREE.PLYLoader.prototype = {
 
 			}
 
-
-			if (this.computeNormals) {
-				geometry.computeFaceNormals();
-				geometry.computeVertexNormals();
-				geometry.useNormals = true;
-			} else {
-
-				if (geometry.normals.length > 0) {
-					geometry.useNormals = true;
-					for ( var i = 0; i < geometry.faces.length; i ++ ) {
-						geometry.faces[ i ].vertexNormals = [
-							geometry.normals[ geometry.faces[ i ].a ],
-							geometry.normals[ geometry.faces[ i ].b ],
-							geometry.normals[ geometry.faces[ i ].c ]
-						];
-					}
-				}
-			}
 			geometry.computeBoundingSphere();
 
 			return geometry;
@@ -439,6 +421,8 @@ THREE.PLYLoader.prototype = {
 				case 'uint32':	case 'uint':	 return [ dataview.getUint32( at, little_endian ), 4 ];
 				case 'float32': case 'float':	 return [ dataview.getFloat32( at, little_endian ), 4 ];
 				case 'float64': case 'double': return [ dataview.getFloat64( at, little_endian ), 8 ];
+
+			}
 
 		}
 
