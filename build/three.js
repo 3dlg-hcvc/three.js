@@ -14408,9 +14408,13 @@ THREE.Loader.prototype = {
 			var textures = {};
 
 			function loadTexture( path, repeat, offset, wrap, anisotropy ) {
-
+				// AXC: Sometimes there is no path
+				if (!path) {
+					console.warn("No path when loading texture");
+					return;
+				}
 				var fullPath = texturePath + path;
-				var loader = THREE.Loader.Handlers.get( fullPath );        
+				var loader = THREE.Loader.Handlers.get( fullPath );
 
 				var texture;
 
@@ -15628,6 +15632,7 @@ THREE.MaterialLoader.prototype = {
 	},
 
 	parse: function ( json ) {
+
 		var material = new THREE[ json.type ];
 		material.uuid = json.uuid;
 
