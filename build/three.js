@@ -14107,6 +14107,8 @@ THREE.LightShadow.prototype = {
 
 		this.mapSize.copy( source.mapSize );
 
+		return this;  // MS
+
 	},
 
 	clone: function () {
@@ -14244,7 +14246,7 @@ THREE.PointLight.prototype.copy = function ( source ) {
 	this.distance = source.distance;
 	this.decay = source.decay;
 
-	if (source.shadow) { this.shadow = source.shadow.clone(); }  // MS
+	this.shadow = source.shadow.clone();
 
 	return this;
 
@@ -14292,7 +14294,7 @@ THREE.SpotLight.prototype.copy = function ( source ) {
 
 	this.target = source.target.clone();
 
-	if (source.shadow) { this.shadow = source.shadow.clone(); }  // MS
+	this.shadow = source.shadow.clone();
 
 	return this;
 

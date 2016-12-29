@@ -38,7 +38,7 @@ THREE.SpotLight.prototype.copy = function ( source ) {
 
 	this.target = source.target.clone();
 
-	if (source.shadow) { this.shadow = source.shadow.clone(); }  // MS
+	this.shadow = source.shadow.clone();
 
 	return this;
 
