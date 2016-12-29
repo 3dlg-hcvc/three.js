@@ -28,7 +28,7 @@ THREE.PointLight.prototype.copy = function ( source ) {
 	this.distance = source.distance;
 	this.decay = source.decay;
 
-	this.shadow = source.shadow.clone();
+	if (source.shadow) { this.shadow = source.shadow.clone(); }  // MS
 
 	return this;
 
