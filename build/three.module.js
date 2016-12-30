@@ -12388,7 +12388,7 @@ Object.assign( DirectGeometry.prototype, {
 
 				} else {
 
-					console.warn( 'THREE.DirectGeometry.fromGeometry(): Undefined vertexUv ', i );
+					//console.warn( 'THREE.DirectGeometry.fromGeometry(): Undefined vertexUv ', i );  // NOTE(MS): Remove this since it fires on sparsely populated face uv arrays
 
 					this.uvs.push( new Vector2(), new Vector2(), new Vector2() );
 
@@ -15058,7 +15058,7 @@ Mesh.prototype = Object.assign( Object.create( Object3D.prototype ), {
 
 					if ( intersection ) {
 
-						if ( uvs ) {
+						if ( uvs && uvs[ f ]) {  // NOTE(MS): This check avoids error due to sparse uvs
 
 							var uvs_f = uvs[ f ];
 							uvA.copy( uvs_f[ 0 ] );
@@ -15083,9 +15083,9 @@ Mesh.prototype = Object.assign( Object.create( Object3D.prototype ), {
 
 	}() ),
 
-	clone: function () {
+	clone: function (recursive) {
 
-		return new this.constructor( this.geometry, this.material ).copy( this );
+		return new this.constructor( this.geometry, this.material ).copy( this, recursive );
 
 	}
 
@@ -22553,9 +22553,9 @@ LensFlare.prototype = Object.assign( Object.create( Object3D.prototype ), {
 
 	isLensFlare: true,
 
-	copy: function ( source ) {
+	copy: function ( source, recursive ) {
 
-		Object3D.prototype.copy.call( this, source );
+		Object3D.prototype.copy.call( this, source, recursive );
 
 		this.positionScreen.copy( source.positionScreen );
 		this.customUpdateCallback = source.customUpdateCallback;
@@ -22720,9 +22720,9 @@ Sprite.prototype = Object.assign( Object.create( Object3D.prototype ), {
 
 	}() ),
 
-	clone: function () {
+	clone: function (recursive) {
 
-		return new this.constructor( this.material ).copy( this );
+		return new this.constructor( this.material ).copy( this, recursive );
 
 	}
 
@@ -23277,9 +23277,9 @@ SkinnedMesh.prototype = Object.assign( Object.create( Mesh.prototype ), {
 
 	},
 
-	clone: function() {
+	clone: function(recursive) {
 
-		return new this.constructor( this.geometry, this.material, this.skeleton.useVertexTexture ).copy( this );
+		return new this.constructor( this.geometry, this.material, this.skeleton.useVertexTexture ).copy( this, recursive );
 
 	}
 
@@ -23513,9 +23513,9 @@ Line.prototype = Object.assign( Object.create( Object3D.prototype ), {
 
 	}() ),
 
-	clone: function () {
+	clone: function (recursive) {
 
-		return new this.constructor( this.geometry, this.material ).copy( this );
+		return new this.constructor( this.geometry, this.material ).copy( this, recursive );
 
 	}
 
@@ -23722,9 +23722,9 @@ Points.prototype = Object.assign( Object.create( Object3D.prototype ), {
 
 	}() ),
 
-	clone: function () {
+	clone: function (recursive) {
 
-		return new this.constructor( this.geometry, this.material ).copy( this );
+		return new this.constructor( this.geometry, this.material ).copy( this, recursive );
 
 	}
 
@@ -32134,6 +32134,9 @@ function Loader() {
 
 }
 
+// AXC: Added so THREE.js will report messages on deprecated stuff, but not so much!!!
+Loader.__reportedMessages = {};
+
 Loader.prototype = {
 
 	constructor: Loader,
@@ -32197,6 +32200,7 @@ Loader.prototype = {
 					texture = textureLoader.load( fullPath );
 
 				}
+ 				texture.name = path;  // AXC: Name of texture using path
 
 				if ( repeat !== undefined ) {
 
@@ -32374,7 +32378,10 @@ Loader.prototype = {
 						json.side = DoubleSide;
 						break;
 					case 'transparency':
-						console.warn( 'THREE.Loader.createMaterial: transparency has been renamed to opacity' );
+						if (!THREE.Loader.__reportedMessages['transparency renamed']) {   // AXC: Make reporting of these messages quieter
+							console.warn( 'THREE.Loader.createMaterial: transparency has been renamed to opacity' );
+							THREE.Loader.__reportedMessages['transparency renamed'] = true;
+						}              
 						json.opacity = value;
 						break;
 					case 'depthTest':
@@ -32392,7 +32399,10 @@ Loader.prototype = {
 						if ( value === 'face' ) json.vertexColors = FaceColors;
 						break;
 					default:
-						console.error( 'THREE.Loader.createMaterial: Unsupported', name, value );
+						if (!THREE.Loader.__reportedMessages['unsupported ' + name]) {   // AXC: Make reporting of these messages quieter
+							console.error( 'THREE.Loader.createMaterial: Unsupported', name, value );
+							THREE.Loader.__reportedMessages['unsupported ' + name] = true;
+						}              
 						break;
 				}
 
