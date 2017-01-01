@@ -75,6 +75,8 @@ THREE.OrbitControls = function ( object, domElement ) {
 	// Mouse buttons
 	this.mouseButtons = { ORBIT: THREE.MOUSE.LEFT, ZOOM: THREE.MOUSE.MIDDLE, PAN: THREE.MOUSE.RIGHT };
 
+	this.panRequiresShift = false;
+
 	// for reset
 	this.target0 = this.target.clone();
 	this.position0 = this.object.position.clone();
@@ -326,9 +328,9 @@ THREE.OrbitControls = function ( object, domElement ) {
 
 			var element = scope.domElement === document ? scope.domElement.body : scope.domElement;
 
-			scope.panRequiresShift = false;
+			var isCombinedCamera = THREE.CombinedCamera && scope.object instanceof THREE.CombinedCamera;
 
-			if ( scope.object instanceof THREE.PerspectiveCamera ) {
+			if ( scope.object instanceof THREE.PerspectiveCamera || (isCombinedCamera && scope.object.inPerspectiveMode)) {
 
 				// perspective
 				var position = scope.object.position;
@@ -342,7 +344,7 @@ THREE.OrbitControls = function ( object, domElement ) {
 				panLeft( 2 * deltaX * targetDistance / element.clientHeight, scope.object.matrix );
 				panUp( 2 * deltaY * targetDistance / element.clientHeight, scope.object.matrix );
 
-			} else if ( scope.object instanceof THREE.OrthographicCamera ) {
+			} else if ( scope.object instanceof THREE.OrthographicCamera || (isCombinedCamera && !scope.object.inPerspectiveMode)) {
 
 				// orthographic
 				panLeft( deltaX * ( scope.object.right - scope.object.left ) / scope.object.zoom / element.clientWidth, scope.object.matrix );
@@ -676,7 +678,10 @@ THREE.OrbitControls = function ( object, domElement ) {
 
 		event.preventDefault();
 
-		if ( event.button === scope.mouseButtons.ORBIT ) {
+		// NOTE(MS): Allow setting of Shift as modifier for panning
+		var isPan = (event.button === scope.mouseButtons.PAN) && (!scope.panRequiresShift || event.shiftKey);
+
+		if ( event.button === scope.mouseButtons.ORBIT && !isPan) {
 
 			if ( scope.enableRotate === false ) return;
 
@@ -692,10 +697,7 @@ THREE.OrbitControls = function ( object, domElement ) {
 
 			state = STATE.DOLLY;
 
-		} else if ( event.button === scope.mouseButtons.PAN ) {
-
-			// NOTE(MS): Allow setting of Shift as modifier for panning
-			if ( scope.panRequiresShift && !event.shiftKey ) return;
+		} else if ( isPan ) {
 
 			if ( scope.enablePan === false ) return;
 
