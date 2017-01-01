@@ -13697,17 +13697,25 @@
 
 				for ( var j = 0, jl = faceVertexUvs.length; j < jl; j ++ ) {
 
-					var uvs = faceVertexUvs[ j ], uvsCopy = [];
+					var uvs = faceVertexUvs[ j ];
 
-					for ( var k = 0, kl = uvs.length; k < kl; k ++ ) {
+					// NOTE(AXC): This check avoids error due to sparse uvs
 
-						var uv = uvs[ k ];
+					if (uvs) {
 
-						uvsCopy.push( uv.clone() );
+						var uvsCopy = [];
+
+						for ( var k = 0, kl = uvs.length; k < kl; k ++ ) {
+
+							var uv = uvs[ k ];
+
+							uvsCopy.push( uv.clone() );
+
+						}
+
+						this.faceVertexUvs[ i ].push( uvsCopy );
 
 					}
-
-					this.faceVertexUvs[ i ].push( uvsCopy );
 
 				}
 
