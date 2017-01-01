@@ -372,6 +372,16 @@ THREE.OrbitControls = function ( object, domElement ) {
 			scope.object.updateProjectionMatrix();
 			zoomChanged = true;
 
+		} else if (THREE.CombinedCamera && scope.object instanceof THREE.CombinedCamera) {
+
+			if ( scope.object.inPerspectiveMode) {
+				scale /= dollyScale;
+			} else {
+				scope.object.zoom = Math.max(this.minZoom, Math.min(this.maxZoom, this.object.zoom * dollyScale));
+				scope.object.updateProjectionMatrix();
+				zoomChanged = true;
+			}
+
 		} else {
 
 			console.warn( 'WARNING: OrbitControls.js encountered an unknown camera type - dolly/zoom disabled.' );
@@ -392,6 +402,16 @@ THREE.OrbitControls = function ( object, domElement ) {
 			scope.object.zoom = Math.max( scope.minZoom, Math.min( scope.maxZoom, scope.object.zoom / dollyScale ) );
 			scope.object.updateProjectionMatrix();
 			zoomChanged = true;
+
+		} else if (THREE.CombinedCamera && scope.object instanceof THREE.CombinedCamera) {
+
+			if ( scope.object.inPerspectiveMode) {
+				scale *= dollyScale;
+			} else {
+				scope.object.zoom = Math.max(this.minZoom, Math.min(this.maxZoom, this.object.zoom / dollyScale));
+				scope.object.updateProjectionMatrix();
+				zoomChanged = true;
+			}
 
 		} else {
 
