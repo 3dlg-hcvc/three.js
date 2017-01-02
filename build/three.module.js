@@ -32192,7 +32192,11 @@ Loader.prototype = {
 			var textures = {};
 
 			function loadTexture( path, repeat, offset, wrap, anisotropy ) {
-
+				// AXC: Sometimes there is no path
+				if (!path) {
+					console.warn("No path when loading texture");
+					return;
+				}
 				var fullPath = texturePath + path;
 				var loader = Loader.Handlers.get( fullPath );
 
@@ -32253,7 +32257,7 @@ Loader.prototype = {
 
 			var json = {
 				uuid: _Math.generateUUID(),
-				type: 'MeshLambertMaterial'
+				type: 'MeshPhysicalMaterial'  // NOTE(MS): MeshLambertMaterial breaks light shadow mapping
 			};
 
 			for ( var name in m ) {
@@ -32274,7 +32278,10 @@ Loader.prototype = {
 						break;
 					case 'colorAmbient':
 					case 'mapAmbient':
-						console.warn( 'THREE.Loader.createMaterial:', name, 'is no longer supported.' );
+						if (!THREE.Loader.__reportedMessages['mapAmbient']) {   // AXC: Make reporting of these messages quieter
+							console.warn( 'THREE.Loader.createMaterial:', name, 'is no longer supported.' );
+							THREE.Loader.__reportedMessages['mapAmbient'] = true;
+						}
 						break;
 					case 'colorDiffuse':
 						json.color = color.fromArray( value ).getHex();

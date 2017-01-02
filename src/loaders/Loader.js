@@ -131,7 +131,7 @@ Loader.prototype = {
 
 			var json = {
 				uuid: _Math.generateUUID(),
-				type: 'MeshPhongMaterial'  // NOTE(MS): MeshLambertMaterial breaks light shadow mapping
+				type: 'MeshPhysicalMaterial'  // NOTE(MS): MeshLambertMaterial breaks light shadow mapping
 			};
 
 			for ( var name in m ) {
