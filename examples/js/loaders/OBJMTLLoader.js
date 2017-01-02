@@ -297,7 +297,7 @@ THREE.OBJMTLLoader.prototype = {
 
 		// vt float float
 
-		var uv_pattern = /vt( +[\d|\.|\+|\-|e]+)( +[\d|\.|\+|\-|e]+)/;
+		var uv_pattern = /vt( +[\d|\.|\+|\-|e]+| NaN)( +[\d|\.|\+|\-|e]+)| NaN/;
 
 		// f vertex vertex vertex ...
 
@@ -330,9 +330,10 @@ THREE.OBJMTLLoader.prototype = {
 
 			var line = lines[ i ];
 			line = line.trim();
+      line = line.toLowerCase();
 
 			// AXC: handle QNANs
-			var newline = line.replace("1.#QNAN", "0");
+			var newline = line.replace("1.#qnan", "0");
 			if (newline !== line) {
 				console.log("THREE.OBJMTLLoader: NAN encountered: " + line);
 				line = newline;

@@ -56,7 +56,7 @@ THREE.MTLLoader.prototype = {
 		var lines = text.split( "\n" );
 		var info = {};
 		var delimiter_pattern = /\s+/;
-		var materialsInfo = {};
+		var materialInfos = [];
 
 		for ( var i = 0; i < lines.length; i ++ ) {
 
@@ -82,8 +82,8 @@ THREE.MTLLoader.prototype = {
 
 				// New material
 
-				info = { name: value };
-				materialsInfo[ value ] = info;
+				info = { name: value, index: materialInfos.length };
+				materialInfos.push(info);
 
 			} else if ( info ) {
 
@@ -105,7 +105,7 @@ THREE.MTLLoader.prototype = {
 		var materialCreator = new THREE.MTLLoader.MaterialCreator( this.baseUrl, this.materialOptions );
 		materialCreator.setCrossOrigin( this.crossOrigin );
 		materialCreator.setManager( this.manager );
-		materialCreator.setMaterials( materialsInfo );
+		materialCreator.setMaterials( materialInfos );
 		return materialCreator;
 
 	}
@@ -133,7 +133,8 @@ THREE.MTLLoader.MaterialCreator = function( baseUrl, options ) {
 
 	this.baseUrl = baseUrl;
 	this.options = options;
-	this.materialsInfo = {};
+	this.materialsInfo = {}; // Material Infos keyed by name
+	this.materialInfosArray = []; // Array of material infos
 	this.materials = {};
 	this.materialsArray = [];
 	this.nameLookup = {};
@@ -167,12 +168,30 @@ THREE.MTLLoader.MaterialCreator.prototype = {
 
 	},
 
-	setMaterials: function( materialsInfo ) {
-
-		this.materialsInfo = this.convert( materialsInfo );
+	setMaterials: function( materialInfos ) {
+		if (Array.isArray(materialInfos)) {
+      this.materialInfosArray = this.convert(materialInfos);
+      this.materialsInfo = {};
+      this.nameLookup = {};
+      for (var i = 0; i < this.materialInfosArray.length; i++) {
+        var m = this.materialInfosArray[i];
+        this.materialsInfo[m.name] = m;
+        this.nameLookup[m.name] = i;
+      }
+    } else {
+      this.materialInfosArray = [];
+      this.materialsInfo = this.convert(materialInfos);
+      this.nameLookup = {};
+      for (var k in this.materialsInfo) {
+      	if (this.materialsInfo.hasOwnProperty(k)) {
+          var m = this.materialsInfo[k];
+          this.nameLookup[m.name] = this.materialInfosArray.length;
+          this.materialInfosArray.push(m);
+        }
+      }
+		}
 		this.materials = {};
-		this.materialsArray = [];
-		this.nameLookup = {};
+		this.materialsArray = null;
 
 	},
 
@@ -180,10 +199,11 @@ THREE.MTLLoader.MaterialCreator.prototype = {
 
 		if ( ! this.options ) return materialsInfo;
 
-		var converted = {};
+		var converted = Array.isArray(materialsInfo)? [] : {};
 
 		var hasKd = false; // AXC: for defaultColor
 		for ( var mn in materialsInfo ) {
+			if (!materialsInfo.hasOwnProperty(mn)) continue; // skip
 
 			// Convert materials info into normalized form based on options
 
@@ -288,14 +308,11 @@ THREE.MTLLoader.MaterialCreator.prototype = {
 
 	getAsArray: function() {
 
-		var index = 0;
-
-		for ( var mn in this.materialsInfo ) {
-
-			this.materialsArray[ index ] = this.create( mn );
-			this.nameLookup[ mn ] = index;
-			index ++;
-
+		if  (!this.materialsArray) {
+			var scope = this;
+			this.materialsArray = this.materialInfosArray.map( function(m) {
+				return scope.create(m);
+			})
 		}
 
 		return this.materialsArray;
@@ -419,6 +436,7 @@ THREE.MTLLoader.MaterialCreator.prototype = {
 		delete params.diffuse;  // AXC: THREE.js now warns about extra params, diffuse is mapped to color
 
 		this.materials[ materialName ] = new THREE.MeshPhongMaterial( params );
+    this.materials[materialName].index = mat.index;
 		return this.materials[ materialName ];
 
 	},
@@ -437,6 +455,8 @@ THREE.MTLLoader.MaterialCreator.prototype = {
 		} else {
 
 			texture = new THREE.Texture();
+			texture.name = url;
+			texture.sourceFile = url;
 
 			loader = new THREE.ImageLoader( manager );
 			loader.setCrossOrigin( this.crossOrigin );

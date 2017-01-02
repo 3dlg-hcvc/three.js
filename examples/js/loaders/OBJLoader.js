@@ -174,7 +174,7 @@ THREE.OBJLoader.prototype = {
 				vertices: [],
 				normals: [],
 				uvs: [],
-                                colors: []              // AXC: Add vertex colors
+				colors: []              // AXC: Add vertex colors
 			};
 
 			material = {
@@ -194,15 +194,15 @@ THREE.OBJLoader.prototype = {
 		var vertices = [];
 		var normals = [];
 		var uvs = [];
-                var colors = [];              // AXC: Add vertex colors
+		var colors = [];              // AXC: Add vertex colors
 
 		// v float float float
 
 		var vertex_pattern = /v( +[\d|\.|\+|\-|e|E]+)( +[\d|\.|\+|\-|e|E]+)( +[\d|\.|\+|\-|e|E]+)/;
 
-                // AXC: Add vertex colors                 
-                // v float float float float float float
-                var vertex_color_pattern = /v( +[\d|\.|\+|\-|e]+)( +[\d|\.|\+|\-|e]+)( +[\d|\.|\+|\-|e]+)( +[\d|\.|\+|\-|e]+)( +[\d|\.|\+|\-|e]+)( +[\d|\.|\+|\-|e]+)/;
+		// AXC: Add vertex colors
+		// v float float float float float float
+		var vertex_color_pattern = /v( +[\d|\.|\+|\-|e]+)( +[\d|\.|\+|\-|e]+)( +[\d|\.|\+|\-|e]+)( +[\d|\.|\+|\-|e]+)( +[\d|\.|\+|\-|e]+)( +[\d|\.|\+|\-|e]+)/;
 
 		// vn float float float
 
@@ -210,7 +210,7 @@ THREE.OBJLoader.prototype = {
 
 		// vt float float
 
-		var uv_pattern = /vt( +[\d|\.|\+|\-|e|E]+)( +[\d|\.|\+|\-|e|E]+)/;
+		var uv_pattern = /vt( +[\d|\.|\+|\-|e|E]+| NaN)( +[\d|\.|\+|\-|e|E]+| NaN)/;
 
 		// f vertex vertex vertex ...
 
@@ -243,7 +243,7 @@ THREE.OBJLoader.prototype = {
 
 				continue;
 
-                        // AXC: Add vertex colors
+	// AXC: Add vertex colors
 			} else if (( result = vertex_color_pattern.exec(line) ) !== null) {
 				vertices.push(
 					parseFloat(result[1]),
