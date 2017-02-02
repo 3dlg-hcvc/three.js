@@ -18978,7 +18978,7 @@ THREE.Mesh.prototype.raycast = ( function () {
 
 					if ( intersection ) {
 
-						intersection.index = a; // triangle number in positions buffer semantics
+						intersection.faceIndex = Math.floor(a / 3); // triangle number in positions buffer semantics
 						intersects.push( intersection );
 
 					}
