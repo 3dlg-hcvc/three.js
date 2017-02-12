@@ -97,13 +97,14 @@ THREE.Mesh.prototype.raycast = ( function () {
 		var intersect;
 		var material = object.material;
 
+		// AXC: Add control for raycaster to not do back face culling (by setting raycaster.intersectBackFaces)
 		if ( material.side === THREE.BackSide ) {
 
-			intersect = ray.intersectTriangle( pC, pB, pA, true, point );
+			intersect = ray.intersectTriangle( pC, pB, pA, !raycaster.intersectBackFaces && true, point );
 
 		} else {
 
-			intersect = ray.intersectTriangle( pA, pB, pC, material.side !== THREE.DoubleSide, point );
+			intersect = ray.intersectTriangle( pA, pB, pC, !raycaster.intersectBackFaces && material.side !== THREE.DoubleSide, point );
 
 		}
 
@@ -231,6 +232,7 @@ THREE.Mesh.prototype.raycast = ( function () {
 
 					if ( intersection ) {
 
+						// AXC: Fix faceIndex
 						intersection.faceIndex = Math.floor(a / 3); // triangle number in positions buffer semantics
 						intersects.push( intersection );
 
