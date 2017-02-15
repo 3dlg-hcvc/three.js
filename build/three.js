@@ -15063,13 +15063,14 @@
 				var intersect;
 				var material = object.material;
 
+				// AXC: Add control for raycaster to not do back face culling (by setting raycaster.intersectBackFaces)
 				if ( material.side === BackSide ) {
 
-					intersect = ray.intersectTriangle( pC, pB, pA, true, point );
+					intersect = ray.intersectTriangle( pC, pB, pA, !raycaster.intersectBackFaces && true, point );
 
 				} else {
 
-					intersect = ray.intersectTriangle( pA, pB, pC, material.side !== DoubleSide, point );
+					intersect = ray.intersectTriangle( pA, pB, pC, !raycaster.intersectBackFaces && material.side !== DoubleSide, point );
 
 				}
 
@@ -15194,7 +15195,8 @@
 
 							if ( intersection ) {
 
-								intersection.index = a; // triangle number in positions buffer semantics
+								// AXC: Fix faceIndex
+								intersection.faceIndex = Math.floor(a / 3); // triangle number in positions buffer semantics
 								intersects.push( intersection );
 
 							}
