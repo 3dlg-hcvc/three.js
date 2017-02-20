@@ -14704,13 +14704,26 @@ THREE.XHRLoader.prototype = {
 
 		request.addEventListener( 'load', function ( event ) {
 
-			var response = event.target.response;
+			// AXC: Check target status code
+			if (event.target.status >= 400 ) {
 
-			THREE.Cache.add( url, response );
+				// These are error codes!
 
-			if ( onLoad ) onLoad( response );
+				if (onError) onError(event);
 
-			scope.manager.itemEnd( url );
+				scope.manager.itemError( url );
+
+			} else {
+
+				var response = event.target.response;
+
+				THREE.Cache.add( url, response );
+
+				if ( onLoad ) onLoad( response );
+
+				scope.manager.itemEnd( url );
+
+			}
 
 		}, false );
 
