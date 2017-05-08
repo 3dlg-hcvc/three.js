@@ -17634,7 +17634,7 @@ THREE.MultiMaterial.prototype = {
 
 	constructor: THREE.MultiMaterial,
 
-	toJSON: function () {
+	toJSON: function (meta) {
 
 		var output = {
 			metadata: {
@@ -17649,7 +17649,9 @@ THREE.MultiMaterial.prototype = {
 
 		for ( var i = 0, l = this.materials.length; i < l; i ++ ) {
 
-			output.materials.push( this.materials[ i ].toJSON() );
+			var material = this.materials[ i ].toJSON(meta);
+			delete material.metadata;
+			output.materials.push( material );
 
 		}
 
