@@ -25578,7 +25578,7 @@ var ShapeUtils = {
 
 			var n = contour.length;
 
-			if ( n < 3 ) return null;
+			if ( n < 3 ) return [];  /* AXC: Return empty array instead of null */
 
 			var result = [],
 				verts = [],
