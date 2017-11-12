@@ -739,6 +739,10 @@ THREE.Geometry.prototype = {
 
 			if ( uv === undefined ) {
 
+				// NOTE(AXC): This avoids error due to sparse uvs
+
+				uvs1.push( undefined );
+
 				continue;
 
 			}
