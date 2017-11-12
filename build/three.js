@@ -12509,17 +12509,25 @@
 
 				for ( j = 0, jl = faceVertexUvs.length; j < jl; j ++ ) {
 
-					var uvs = faceVertexUvs[ j ], uvsCopy = [];
+					var uvs = faceVertexUvs[ j ];
 
-					for ( k = 0, kl = uvs.length; k < kl; k ++ ) {
+					// NOTE(AXC): This check avoids error due to sparse uvs
 
-						var uv = uvs[ k ];
+					if (uvs) {
 
-						uvsCopy.push( uv.clone() );
+						var uvsCopy = [];
+
+						for (k = 0, kl = uvs.length; k < kl; k ++ ) {
+
+							var uv = uvs[ k ];
+
+							uvsCopy.push( uv.clone() );
+
+						}
+
+						this.faceVertexUvs[ i ].push( uvsCopy );
 
 					}
-
-					this.faceVertexUvs[ i ].push( uvsCopy );
 
 				}
 
@@ -13297,7 +13305,7 @@
 
 					} else {
 
-						console.warn( 'THREE.DirectGeometry.fromGeometry(): Undefined vertexUv ', i );
+						//console.warn( 'THREE.DirectGeometry.fromGeometry(): Undefined vertexUv ', i );  // NOTE(MS): Remove this since it fires on sparsely populated face uv arrays
 
 						this.uvs.push( new Vector2(), new Vector2(), new Vector2() );
 
@@ -18503,7 +18511,8 @@
 				var context = canvas.getContext( '2d' );
 				context.drawImage( image, 0, 0, canvas.width, canvas.height );
 
-				console.warn( 'THREE.WebGLRenderer: image is not power of two (' + image.width + 'x' + image.height + '). Resized to ' + canvas.width + 'x' + canvas.height, image );
+				// NOTE (MS) Don't warn about non-power of two textures all the time
+				//console.warn( 'THREE.WebGLRenderer: image is not power of two (' + image.width + 'x' + image.height + '). Resized to ' + canvas.width + 'x' + canvas.height, image );
 
 				return canvas;
 
@@ -23842,9 +23851,9 @@
 
 		isLensFlare: true,
 
-		copy: function ( source ) {
+		copy: function ( source, recursive ) {
 
-			Object3D.prototype.copy.call( this, source );
+			Object3D.prototype.copy.call( this, source, recursive );
 
 			this.positionScreen.copy( source.positionScreen );
 			this.customUpdateCallback = source.customUpdateCallback;
@@ -24013,9 +24022,9 @@
 
 		}() ),
 
-		clone: function () {
+		clone: function (recursive) {
 
-			return new this.constructor( this.material ).copy( this );
+			return new this.constructor( this.material ).copy( this, recursive );
 
 		}
 
@@ -24563,9 +24572,9 @@
 
 		},
 
-		clone: function () {
+		clone: function (recursive) {
 
-			return new this.constructor( this.geometry, this.material ).copy( this );
+			return new this.constructor( this.geometry, this.material ).copy( this, recursive );
 
 		}
 
@@ -24799,9 +24808,9 @@
 
 		}() ),
 
-		clone: function () {
+		clone: function (recursive) {
 
-			return new this.constructor( this.geometry, this.material ).copy( this );
+			return new this.constructor( this.geometry, this.material ).copy( this, recursive );
 
 		}
 
@@ -25029,9 +25038,9 @@
 
 		}() ),
 
-		clone: function () {
+		clone: function (recursive) {
 
-			return new this.constructor( this.geometry, this.material ).copy( this );
+			return new this.constructor( this.geometry, this.material ).copy( this, recursive );
 
 		}
 
@@ -26689,7 +26698,7 @@
 
 				var n = contour.length;
 
-				if ( n < 3 ) return null;
+				if ( n < 3 ) return [];  /* AXC: Return empty array instead of null */
 
 				var result = [],
 					verts = [],
@@ -31023,10 +31032,13 @@
 			var texture = new Texture();
 			texture.image = loader.load( url, function () {
 
+				// AXC: Comment out check for jpeg and setting of texture.format 
+				//      Breaks rendering of textures in headless mode
 				// JPEGs can't have an alpha channel, so memory can be saved by storing them as RGB.
-				var isJPEG = url.search( /\.(jpg|jpeg)$/ ) > 0 || url.search( /^data\:image\/jpeg/ ) === 0;
+				//var isJPEG = url.search( /\.(jpg|jpeg)$/ ) > 0 || url.search( /^data\:image\/jpeg/ ) === 0;
 
-				texture.format = isJPEG ? RGBFormat : RGBAFormat;
+				//texture.format = isJPEG ? RGBFormat : RGBAFormat;
+
 				texture.needsUpdate = true;
 
 				if ( onLoad !== undefined ) {
