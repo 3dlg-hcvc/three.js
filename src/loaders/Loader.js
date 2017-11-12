@@ -14,11 +14,11 @@ import {
 
 	MirroredRepeatWrapping,
 	RepeatWrapping
-} from '../constants';
-import { _Math } from '../math/Math';
-import { MaterialLoader } from './MaterialLoader';
-import { TextureLoader } from './TextureLoader';
-import { Color } from '../math/Color';
+} from '../constants.js';
+import { _Math } from '../math/Math.js';
+import { MaterialLoader } from './MaterialLoader.js';
+import { TextureLoader } from './TextureLoader.js';
+import { Color } from '../math/Color.js';
 
 /**
  * @author alteredq / http://alteredqualia.com/
@@ -32,12 +32,40 @@ function Loader() {
 
 }
 
-// AXC: Added so THREE.js will report messages on deprecated stuff, but not so much!!!
-Loader.__reportedMessages = {};
+Loader.Handlers = {
 
-Loader.prototype = {
+	handlers: [],
 
-	constructor: Loader,
+	add: function ( regex, loader ) {
+
+		this.handlers.push( regex, loader );
+
+	},
+
+	get: function ( file ) {
+
+		var handlers = this.handlers;
+
+		for ( var i = 0, l = handlers.length; i < l; i += 2 ) {
+
+			var regex = handlers[ i ];
+			var loader = handlers[ i + 1 ];
+
+			if ( regex.test( file ) ) {
+
+				return loader;
+
+			}
+
+		}
+
+		return null;
+
+	}
+
+};
+
+Object.assign( Loader.prototype, {
 
 	crossOrigin: undefined,
 
@@ -78,24 +106,18 @@ Loader.prototype = {
 			CustomBlending: CustomBlending
 		};
 
-		var color, textureLoader, materialLoader;
+		var color = new Color();
+		var textureLoader = new TextureLoader();
+		var materialLoader = new MaterialLoader();
 
 		return function createMaterial( m, texturePath, crossOrigin ) {
-
-			if ( color === undefined ) color = new Color();
-			if ( textureLoader === undefined ) textureLoader = new TextureLoader();
-			if ( materialLoader === undefined ) materialLoader = new MaterialLoader();
 
 			// convert from old material format
 
 			var textures = {};
 
 			function loadTexture( path, repeat, offset, wrap, anisotropy ) {
-				// AXC: Sometimes there is no path
-				if (!path) {
-					console.warn("No path when loading texture");
-					return;
-				}
+
 				var fullPath = texturePath + path;
 				var loader = Loader.Handlers.get( fullPath );
 
@@ -111,7 +133,6 @@ Loader.prototype = {
 					texture = textureLoader.load( fullPath );
 
 				}
- 				texture.name = path;  // AXC: Name of texture using path
 
 				if ( repeat !== undefined ) {
 
@@ -156,7 +177,7 @@ Loader.prototype = {
 
 			var json = {
 				uuid: _Math.generateUUID(),
-				type: 'MeshPhysicalMaterial'  // NOTE(MS): MeshLambertMaterial breaks light shadow mapping
+				type: 'MeshLambertMaterial'
 			};
 
 			for ( var name in m ) {
@@ -178,10 +199,7 @@ Loader.prototype = {
 						break;
 					case 'colorAmbient':
 					case 'mapAmbient':
-						if (!THREE.Loader.__reportedMessages['mapAmbient']) {   // AXC: Make reporting of these messages quieter
-							console.warn( 'THREE.Loader.createMaterial:', name, 'is no longer supported.' );
-							THREE.Loader.__reportedMessages['mapAmbient'] = true;
-						}
+						console.warn( 'THREE.Loader.createMaterial:', name, 'is no longer supported.' );
 						break;
 					case 'colorDiffuse':
 						json.color = color.fromArray( value ).getHex();
@@ -293,10 +311,7 @@ Loader.prototype = {
 						json.side = DoubleSide;
 						break;
 					case 'transparency':
-						if (!THREE.Loader.__reportedMessages['transparency renamed']) {   // AXC: Make reporting of these messages quieter
-							console.warn( 'THREE.Loader.createMaterial: transparency has been renamed to opacity' );
-							THREE.Loader.__reportedMessages['transparency renamed'] = true;
-						}              
+						console.warn( 'THREE.Loader.createMaterial: transparency has been renamed to opacity' );
 						json.opacity = value;
 						break;
 					case 'depthTest':
@@ -314,10 +329,7 @@ Loader.prototype = {
 						if ( value === 'face' ) json.vertexColors = FaceColors;
 						break;
 					default:
-						if (!THREE.Loader.__reportedMessages['unsupported ' + name]) {   // AXC: Make reporting of these messages quieter
-							console.error( 'THREE.Loader.createMaterial: Unsupported', name, value );
-							THREE.Loader.__reportedMessages['unsupported ' + name] = true;
-						}              
+						console.error( 'THREE.Loader.createMaterial: Unsupported', name, value );
 						break;
 
 				}
@@ -337,40 +349,7 @@ Loader.prototype = {
 
 	} )()
 
-};
-
-Loader.Handlers = {
-
-	handlers: [],
-
-	add: function ( regex, loader ) {
-
-		this.handlers.push( regex, loader );
-
-	},
-
-	get: function ( file ) {
-
-		var handlers = this.handlers;
-
-		for ( var i = 0, l = handlers.length; i < l; i += 2 ) {
-
-			var regex = handlers[ i ];
-			var loader = handlers[ i + 1 ];
-
-			if ( regex.test( file ) ) {
-
-				return loader;
-
-			}
-
-		}
-
-		return null;
-
-	}
-
-};
+} );
 
 
 export { Loader };

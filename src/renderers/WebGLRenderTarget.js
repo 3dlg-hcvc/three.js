@@ -1,8 +1,8 @@
-import { EventDispatcher } from '../core/EventDispatcher';
-import { Texture } from '../textures/Texture';
-import { LinearFilter } from '../constants';
-import { Vector4 } from '../math/Vector4';
-import { _Math } from '../math/Math';
+import { EventDispatcher } from '../core/EventDispatcher.js';
+import { Texture } from '../textures/Texture.js';
+import { LinearFilter } from '../constants.js';
+import { Vector4 } from '../math/Vector4.js';
+import { _Math } from '../math/Math.js';
 
 /**
  * @author szimek / https://github.com/szimek/
@@ -39,9 +39,7 @@ function WebGLRenderTarget( width, height, options ) {
 
 }
 
-WebGLRenderTarget.prototype = {
-
-	constructor: WebGLRenderTarget,
+Object.assign( WebGLRenderTarget.prototype, EventDispatcher.prototype, {
 
 	isWebGLRenderTarget: true,
 
@@ -90,8 +88,7 @@ WebGLRenderTarget.prototype = {
 
 	}
 
-};
+} );
 
-Object.assign( WebGLRenderTarget.prototype, EventDispatcher.prototype );
 
 export { WebGLRenderTarget };

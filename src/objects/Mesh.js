@@ -1,14 +1,14 @@
-import { Vector3 } from '../math/Vector3';
-import { Vector2 } from '../math/Vector2';
-import { Sphere } from '../math/Sphere';
-import { Ray } from '../math/Ray';
-import { Matrix4 } from '../math/Matrix4';
-import { Object3D } from '../core/Object3D';
-import { Triangle } from '../math/Triangle';
-import { Face3 } from '../core/Face3';
-import { DoubleSide, BackSide, TrianglesDrawMode } from '../constants';
-import { MeshBasicMaterial } from '../materials/MeshBasicMaterial';
-import { BufferGeometry } from '../core/BufferGeometry';
+import { Vector3 } from '../math/Vector3.js';
+import { Vector2 } from '../math/Vector2.js';
+import { Sphere } from '../math/Sphere.js';
+import { Ray } from '../math/Ray.js';
+import { Matrix4 } from '../math/Matrix4.js';
+import { Object3D } from '../core/Object3D.js';
+import { Triangle } from '../math/Triangle.js';
+import { Face3 } from '../core/Face3.js';
+import { DoubleSide, BackSide, TrianglesDrawMode } from '../constants.js';
+import { MeshBasicMaterial } from '../materials/MeshBasicMaterial.js';
+import { BufferGeometry } from '../core/BufferGeometry.js';
 
 /**
  * @author mrdoob / http://mrdoob.com/
@@ -44,11 +44,23 @@ Mesh.prototype = Object.assign( Object.create( Object3D.prototype ), {
 
 	},
 
-	copy: function ( source, recursive ) {
+	copy: function ( source ) {
 
-		Object3D.prototype.copy.call( this, source, recursive );
+		Object3D.prototype.copy.call( this, source );
 
 		this.drawMode = source.drawMode;
+
+		if ( source.morphTargetInfluences !== undefined ) {
+
+			this.morphTargetInfluences = source.morphTargetInfluences.slice();
+
+		}
+
+		if ( source.morphTargetDictionary !== undefined ) {
+
+			this.morphTargetDictionary = Object.assign( {}, source.morphTargetDictionary );
+
+		}
 
 		return this;
 
@@ -56,17 +68,53 @@ Mesh.prototype = Object.assign( Object.create( Object3D.prototype ), {
 
 	updateMorphTargets: function () {
 
-		var morphTargets = this.geometry.morphTargets;
+		var geometry = this.geometry;
+		var m, ml, name;
 
-		if ( morphTargets !== undefined && morphTargets.length > 0 ) {
+		if ( geometry.isBufferGeometry ) {
 
-			this.morphTargetInfluences = [];
-			this.morphTargetDictionary = {};
+			var morphAttributes = geometry.morphAttributes;
+			var keys = Object.keys( morphAttributes );
 
-			for ( var m = 0, ml = morphTargets.length; m < ml; m ++ ) {
+			if ( keys.length > 0 ) {
 
-				this.morphTargetInfluences.push( 0 );
-				this.morphTargetDictionary[ morphTargets[ m ].name ] = m;
+				var morphAttribute = morphAttributes[ keys[ 0 ] ];
+
+				if ( morphAttribute !== undefined ) {
+
+					this.morphTargetInfluences = [];
+					this.morphTargetDictionary = {};
+
+					for ( m = 0, ml = morphAttribute.length; m < ml; m ++ ) {
+
+						name = morphAttribute[ m ].name || String( m );
+
+						this.morphTargetInfluences.push( 0 );
+						this.morphTargetDictionary[ name ] = m;
+
+					}
+
+				}
+
+			}
+
+		} else {
+
+			var morphTargets = geometry.morphTargets;
+
+			if ( morphTargets !== undefined && morphTargets.length > 0 ) {
+
+				this.morphTargetInfluences = [];
+				this.morphTargetDictionary = {};
+
+				for ( m = 0, ml = morphTargets.length; m < ml; m ++ ) {
+
+					name = morphTargets[ m ].name || String( m );
+
+					this.morphTargetInfluences.push( 0 );
+					this.morphTargetDictionary[ name ] = m;
+
+				}
 
 			}
 
@@ -111,19 +159,17 @@ Mesh.prototype = Object.assign( Object.create( Object3D.prototype ), {
 
 		}
 
-		function checkIntersection( object, raycaster, ray, pA, pB, pC, point ) {
+		function checkIntersection( object, material, raycaster, ray, pA, pB, pC, point ) {
 
 			var intersect;
-			var material = object.material;
 
-			// AXC: Add control for raycaster to not do back face culling (by setting raycaster.intersectBackFaces)
 			if ( material.side === BackSide ) {
 
-				intersect = ray.intersectTriangle( pC, pB, pA, !raycaster.intersectBackFaces && true, point );
+				intersect = ray.intersectTriangle( pC, pB, pA, true, point );
 
 			} else {
 
-				intersect = ray.intersectTriangle( pA, pB, pC, !raycaster.intersectBackFaces && material.side !== DoubleSide, point );
+				intersect = ray.intersectTriangle( pA, pB, pC, material.side !== DoubleSide, point );
 
 			}
 
@@ -150,7 +196,7 @@ Mesh.prototype = Object.assign( Object.create( Object3D.prototype ), {
 			vB.fromBufferAttribute( position, b );
 			vC.fromBufferAttribute( position, c );
 
-			var intersection = checkIntersection( object, raycaster, ray, vA, vB, vC, intersectionPoint );
+			var intersection = checkIntersection( object, object.material, raycaster, ray, vA, vB, vC, intersectionPoint );
 
 			if ( intersection ) {
 
@@ -160,7 +206,7 @@ Mesh.prototype = Object.assign( Object.create( Object3D.prototype ), {
 					uvB.fromBufferAttribute( uv, b );
 					uvC.fromBufferAttribute( uv, c );
 
-					intersection.uv = uvIntersection( intersectionPoint,  vA, vB, vC, uvA, uvB, uvC );
+					intersection.uv = uvIntersection( intersectionPoint, vA, vB, vC, uvA, uvB, uvC );
 
 				}
 
@@ -234,7 +280,7 @@ Mesh.prototype = Object.assign( Object.create( Object3D.prototype ), {
 
 					}
 
-				} else {
+				} else if ( position !== undefined ) {
 
 					// non-indexed buffer geometry
 
@@ -248,8 +294,7 @@ Mesh.prototype = Object.assign( Object.create( Object3D.prototype ), {
 
 						if ( intersection ) {
 
-							// AXC: Fix faceIndex
-							intersection.faceIndex = Math.floor(a / 3); // triangle number in positions buffer semantics
+							intersection.index = a; // triangle number in positions buffer semantics
 							intersects.push( intersection );
 
 						}
@@ -261,8 +306,7 @@ Mesh.prototype = Object.assign( Object.create( Object3D.prototype ), {
 			} else if ( geometry.isGeometry ) {
 
 				var fvA, fvB, fvC;
-				var isFaceMaterial = ( material && material.isMultiMaterial );
-				var materials = isFaceMaterial === true ? material.materials : null;
+				var isMultiMaterial = Array.isArray( material );
 
 				var vertices = geometry.vertices;
 				var faces = geometry.faces;
@@ -274,7 +318,7 @@ Mesh.prototype = Object.assign( Object.create( Object3D.prototype ), {
 				for ( var f = 0, fl = faces.length; f < fl; f ++ ) {
 
 					var face = faces[ f ];
-					var faceMaterial = isFaceMaterial === true ? materials[ face.materialIndex ] : material;
+					var faceMaterial = isMultiMaterial ? material[ face.materialIndex ] : material;
 
 					if ( faceMaterial === undefined ) continue;
 
@@ -315,11 +359,11 @@ Mesh.prototype = Object.assign( Object.create( Object3D.prototype ), {
 
 					}
 
-					intersection = checkIntersection( this, raycaster, ray, fvA, fvB, fvC, intersectionPoint );
+					intersection = checkIntersection( this, faceMaterial, raycaster, ray, fvA, fvB, fvC, intersectionPoint );
 
 					if ( intersection ) {
 
-						if ( uvs && uvs[ f ]) {  // NOTE(MS): This check avoids error due to sparse uvs
+						if ( uvs && uvs[ f ] ) {
 
 							var uvs_f = uvs[ f ];
 							uvA.copy( uvs_f[ 0 ] );
@@ -344,9 +388,9 @@ Mesh.prototype = Object.assign( Object.create( Object3D.prototype ), {
 
 	}() ),
 
-	clone: function (recursive) {
+	clone: function () {
 
-		return new this.constructor( this.geometry, this.material ).copy( this, recursive );
+		return new this.constructor( this.geometry, this.material ).copy( this );
 
 	}
 

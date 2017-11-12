@@ -2,10 +2,10 @@
  * @author mrdoob / http://mrdoob.com/
  */
 
-import { RGBAFormat, RGBFormat } from '../constants';
-import { ImageLoader } from './ImageLoader';
-import { Texture } from '../textures/Texture';
-import { DefaultLoadingManager } from './LoadingManager';
+import { RGBAFormat, RGBFormat } from '../constants.js';
+import { ImageLoader } from './ImageLoader.js';
+import { Texture } from '../textures/Texture.js';
+import { DefaultLoadingManager } from './LoadingManager.js';
 
 
 function TextureLoader( manager ) {
@@ -16,14 +16,16 @@ function TextureLoader( manager ) {
 
 Object.assign( TextureLoader.prototype, {
 
-	load: function ( url, onLoad, onProgress, onError ) {
+	crossOrigin: 'Anonymous',
 
-		var texture = new Texture();
+	load: function ( url, onLoad, onProgress, onError ) {
 
 		var loader = new ImageLoader( this.manager );
 		loader.setCrossOrigin( this.crossOrigin );
 		loader.setPath( this.path );
-		loader.load( url, function ( image ) {
+
+		var texture = new Texture();
+		texture.image = loader.load( url, function () {
 
 			// AXC: Comment out check for jpeg and setting of texture.format 
 			//      Breaks rendering of textures in headless mode
@@ -31,7 +33,7 @@ Object.assign( TextureLoader.prototype, {
 			//var isJPEG = url.search( /\.(jpg|jpeg)$/ ) > 0 || url.search( /^data\:image\/jpeg/ ) === 0;
 
 			//texture.format = isJPEG ? RGBFormat : RGBAFormat;
-			texture.image = image;
+
 			texture.needsUpdate = true;
 
 			if ( onLoad !== undefined ) {

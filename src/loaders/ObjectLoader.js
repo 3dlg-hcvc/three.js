@@ -18,37 +18,39 @@ import {
 	LinearFilter,
 	LinearMipMapNearestFilter,
 	LinearMipMapLinearFilter
-} from '../constants';
-import { Color } from '../math/Color';
-import { Matrix4 } from '../math/Matrix4';
-import { Object3D } from '../core/Object3D';
-import { Group } from '../objects/Group';
-import { Sprite } from '../objects/Sprite';
-import { Points } from '../objects/Points';
-import { Line } from '../objects/Line';
-import { LineSegments } from '../objects/LineSegments';
-import { LOD } from '../objects/LOD';
-import { Mesh } from '../objects/Mesh';
-import { SkinnedMesh } from '../objects/SkinnedMesh';
-import { Fog } from '../scenes/Fog';
-import { FogExp2 } from '../scenes/FogExp2';
-import { HemisphereLight } from '../lights/HemisphereLight';
-import { SpotLight } from '../lights/SpotLight';
-import { PointLight } from '../lights/PointLight';
-import { DirectionalLight } from '../lights/DirectionalLight';
-import { AmbientLight } from '../lights/AmbientLight';
-import { OrthographicCamera } from '../cameras/OrthographicCamera';
-import { PerspectiveCamera } from '../cameras/PerspectiveCamera';
-import { Scene } from '../scenes/Scene';
-import { Texture } from '../textures/Texture';
-import { ImageLoader } from './ImageLoader';
-import { LoadingManager, DefaultLoadingManager } from './LoadingManager';
-import { AnimationClip } from '../animation/AnimationClip';
-import { MaterialLoader } from './MaterialLoader';
-import { BufferGeometryLoader } from './BufferGeometryLoader';
-import { JSONLoader } from './JSONLoader';
-import { FileLoader } from './FileLoader';
-import * as Geometries from '../geometries/Geometries';
+} from '../constants.js';
+import { Color } from '../math/Color.js';
+import { Matrix4 } from '../math/Matrix4.js';
+import { Object3D } from '../core/Object3D.js';
+import { Group } from '../objects/Group.js';
+import { Sprite } from '../objects/Sprite.js';
+import { Points } from '../objects/Points.js';
+import { Line } from '../objects/Line.js';
+import { LineLoop } from '../objects/LineLoop.js';
+import { LineSegments } from '../objects/LineSegments.js';
+import { LOD } from '../objects/LOD.js';
+import { Mesh } from '../objects/Mesh.js';
+import { SkinnedMesh } from '../objects/SkinnedMesh.js';
+import { Fog } from '../scenes/Fog.js';
+import { FogExp2 } from '../scenes/FogExp2.js';
+import { HemisphereLight } from '../lights/HemisphereLight.js';
+import { SpotLight } from '../lights/SpotLight.js';
+import { PointLight } from '../lights/PointLight.js';
+import { DirectionalLight } from '../lights/DirectionalLight.js';
+import { AmbientLight } from '../lights/AmbientLight.js';
+import { RectAreaLight } from '../lights/RectAreaLight.js';
+import { OrthographicCamera } from '../cameras/OrthographicCamera.js';
+import { PerspectiveCamera } from '../cameras/PerspectiveCamera.js';
+import { Scene } from '../scenes/Scene.js';
+import { Texture } from '../textures/Texture.js';
+import { ImageLoader } from './ImageLoader.js';
+import { LoadingManager, DefaultLoadingManager } from './LoadingManager.js';
+import { AnimationClip } from '../animation/AnimationClip.js';
+import { MaterialLoader } from './MaterialLoader.js';
+import { BufferGeometryLoader } from './BufferGeometryLoader.js';
+import { JSONLoader } from './JSONLoader.js';
+import { FileLoader } from './FileLoader.js';
+import * as Geometries from '../geometries/Geometries.js';
 
 /**
  * @author mrdoob / http://mrdoob.com/
@@ -252,9 +254,13 @@ Object.assign( ObjectLoader.prototype, {
 						break;
 
 					case 'DodecahedronGeometry':
+					case 'DodecahedronBufferGeometry':
 					case 'IcosahedronGeometry':
+					case 'IcosahedronBufferGeometry':
 					case 'OctahedronGeometry':
+					case 'OctahedronBufferGeometry':
 					case 'TetrahedronGeometry':
+					case 'TetrahedronBufferGeometry':
 
 						geometry = new Geometries[ data.type ](
 							data.radius,
@@ -316,6 +322,18 @@ Object.assign( ObjectLoader.prototype, {
 
 						break;
 
+					case 'PolyhedronGeometry':
+					case 'PolyhedronBufferGeometry':
+
+						geometry = new Geometries[ data.type ](
+							data.vertices,
+							data.indices,
+							data.radius,
+							data.details
+						);
+
+						break;
+
 					case 'BufferGeometry':
 
 						geometry = bufferGeometryLoader.parse( data );
@@ -324,7 +342,7 @@ Object.assign( ObjectLoader.prototype, {
 
 					case 'Geometry':
 
-						geometry = geometryLoader.parse( data.data, this.texturePath ).geometry;
+						geometry = geometryLoader.parse( data, this.texturePath ).geometry;
 
 						break;
 
@@ -361,8 +379,27 @@ Object.assign( ObjectLoader.prototype, {
 
 			for ( var i = 0, l = json.length; i < l; i ++ ) {
 
-				var material = loader.parse( json[ i ] );
-				materials[ material.uuid ] = material;
+				var data = json[ i ];
+
+				if ( data.type === 'MultiMaterial' ) {
+
+					// Deprecated
+
+					var array = [];
+
+					for ( var j = 0; j < data.materials.length; j ++ ) {
+
+						array.push( loader.parse( data.materials[ j ] ) );
+
+					}
+
+					materials[ data.uuid ] = array;
+
+				} else {
+
+					materials[ data.uuid ] = loader.parse( data );
+
+				}
 
 			}
 
@@ -403,6 +440,7 @@ Object.assign( ObjectLoader.prototype, {
 
 			}, undefined, function () {
 
+				scope.manager.itemEnd( url );
 				scope.manager.itemError( url );
 
 			} );
@@ -433,35 +471,9 @@ Object.assign( ObjectLoader.prototype, {
 
 	parseTextures: function ( json, images ) {
 
-		var TextureMapping = {
-			UVMapping: UVMapping,
-			CubeReflectionMapping: CubeReflectionMapping,
-			CubeRefractionMapping: CubeRefractionMapping,
-			EquirectangularReflectionMapping: EquirectangularReflectionMapping,
-			EquirectangularRefractionMapping: EquirectangularRefractionMapping,
-			SphericalReflectionMapping: SphericalReflectionMapping,
-			CubeUVReflectionMapping: CubeUVReflectionMapping,
-			CubeUVRefractionMapping: CubeUVRefractionMapping
-		};
-
-		var TextureWrapping = {
-			RepeatWrapping: RepeatWrapping,
-			ClampToEdgeWrapping: ClampToEdgeWrapping,
-			MirroredRepeatWrapping: MirroredRepeatWrapping
-		};
-
-		var TextureFilter = {
-			NearestFilter: NearestFilter,
-			NearestMipMapNearestFilter: NearestMipMapNearestFilter,
-			NearestMipMapLinearFilter: NearestMipMapLinearFilter,
-			LinearFilter: LinearFilter,
-			LinearMipMapNearestFilter: LinearMipMapNearestFilter,
-			LinearMipMapLinearFilter: LinearMipMapLinearFilter
-		};
-
 		function parseConstant( value, type ) {
 
-			if ( typeof( value ) === 'number' ) return value;
+			if ( typeof value === 'number' ) return value;
 
 			console.warn( 'THREE.ObjectLoader.parseTexture: Constant should be in numeric form.', value );
 
@@ -496,19 +508,22 @@ Object.assign( ObjectLoader.prototype, {
 
 				if ( data.name !== undefined ) texture.name = data.name;
 
-				if ( data.mapping !== undefined ) texture.mapping = parseConstant( data.mapping, TextureMapping );
+				if ( data.mapping !== undefined ) texture.mapping = parseConstant( data.mapping, TEXTURE_MAPPING );
 
 				if ( data.offset !== undefined ) texture.offset.fromArray( data.offset );
 				if ( data.repeat !== undefined ) texture.repeat.fromArray( data.repeat );
+				if ( data.center !== undefined ) texture.center.fromArray( data.center );
+				if ( data.rotation !== undefined ) texture.rotation = data.rotation;
+
 				if ( data.wrap !== undefined ) {
 
-					texture.wrapS = parseConstant( data.wrap[ 0 ], TextureWrapping );
-					texture.wrapT = parseConstant( data.wrap[ 1 ], TextureWrapping );
+					texture.wrapS = parseConstant( data.wrap[ 0 ], TEXTURE_WRAPPING );
+					texture.wrapT = parseConstant( data.wrap[ 1 ], TEXTURE_WRAPPING );
 
 				}
 
-				if ( data.minFilter !== undefined ) texture.minFilter = parseConstant( data.minFilter, TextureFilter );
-				if ( data.magFilter !== undefined ) texture.magFilter = parseConstant( data.magFilter, TextureFilter );
+				if ( data.minFilter !== undefined ) texture.minFilter = parseConstant( data.minFilter, TEXTURE_FILTER );
+				if ( data.magFilter !== undefined ) texture.magFilter = parseConstant( data.magFilter, TEXTURE_FILTER );
 				if ( data.anisotropy !== undefined ) texture.anisotropy = data.anisotropy;
 
 				if ( data.flipY !== undefined ) texture.flipY = data.flipY;
@@ -546,6 +561,28 @@ Object.assign( ObjectLoader.prototype, {
 			function getMaterial( name ) {
 
 				if ( name === undefined ) return undefined;
+
+				if ( Array.isArray( name ) ) {
+
+					var array = [];
+
+					for ( var i = 0, l = name.length; i < l; i ++ ) {
+
+						var uuid = name[ i ];
+
+						if ( materials[ uuid ] === undefined ) {
+
+							console.warn( 'THREE.ObjectLoader: Undefined material', uuid );
+
+						}
+
+						array.push( materials[ uuid ] );
+
+					}
+
+					return array;
+
+				}
 
 				if ( materials[ name ] === undefined ) {
 
@@ -625,6 +662,12 @@ Object.assign( ObjectLoader.prototype, {
 
 					break;
 
+				case 'RectAreaLight':
+
+					object = new RectAreaLight( data.color, data.intensity, data.width, data.height );
+
+					break;
+
 				case 'SpotLight':
 
 					object = new SpotLight( data.color, data.intensity, data.distance, data.angle, data.penumbra, data.decay );
@@ -636,6 +679,10 @@ Object.assign( ObjectLoader.prototype, {
 					object = new HemisphereLight( data.color, data.groundColor, data.intensity );
 
 					break;
+
+				case 'SkinnedMesh':
+
+					console.warn( 'THREE.ObjectLoader.parseObject() does not support SkinnedMesh yet.' );
 
 				case 'Mesh':
 
@@ -666,6 +713,12 @@ Object.assign( ObjectLoader.prototype, {
 
 					break;
 
+				case 'LineLoop':
+
+					object = new LineLoop( getGeometry( data.geometry ), getMaterial( data.material ) );
+
+					break;
+
 				case 'LineSegments':
 
 					object = new LineSegments( getGeometry( data.geometry ), getMaterial( data.material ) );
@@ -690,10 +743,6 @@ Object.assign( ObjectLoader.prototype, {
 					object = new Group();
 
 					break;
-
-				case 'SkinnedMesh':
-
-					console.warn( 'THREE.ObjectLoader.parseObject() does not support SkinnedMesh type. Instantiates Object3D instead.' );
 
 				default:
 
@@ -735,9 +784,11 @@ Object.assign( ObjectLoader.prototype, {
 
 			if ( data.children !== undefined ) {
 
-				for ( var child in data.children ) {
+				var children = data.children;
 
-					object.add( this.parseObject( data.children[ child ], geometries, materials ) );
+				for ( var i = 0; i < children.length; i ++ ) {
+
+					object.add( this.parseObject( children[ i ], geometries, materials ) );
 
 				}
 
@@ -769,6 +820,32 @@ Object.assign( ObjectLoader.prototype, {
 	}()
 
 } );
+
+var TEXTURE_MAPPING = {
+	UVMapping: UVMapping,
+	CubeReflectionMapping: CubeReflectionMapping,
+	CubeRefractionMapping: CubeRefractionMapping,
+	EquirectangularReflectionMapping: EquirectangularReflectionMapping,
+	EquirectangularRefractionMapping: EquirectangularRefractionMapping,
+	SphericalReflectionMapping: SphericalReflectionMapping,
+	CubeUVReflectionMapping: CubeUVReflectionMapping,
+	CubeUVRefractionMapping: CubeUVRefractionMapping
+};
+
+var TEXTURE_WRAPPING = {
+	RepeatWrapping: RepeatWrapping,
+	ClampToEdgeWrapping: ClampToEdgeWrapping,
+	MirroredRepeatWrapping: MirroredRepeatWrapping
+};
+
+var TEXTURE_FILTER = {
+	NearestFilter: NearestFilter,
+	NearestMipMapNearestFilter: NearestMipMapNearestFilter,
+	NearestMipMapLinearFilter: NearestMipMapLinearFilter,
+	LinearFilter: LinearFilter,
+	LinearMipMapNearestFilter: LinearMipMapNearestFilter,
+	LinearMipMapLinearFilter: LinearMipMapLinearFilter
+};
 
 
 export { ObjectLoader };

@@ -13,7 +13,7 @@
 		<h1>[name]</h1>
 
 		<div class="desc">
-			This used internally by [page:DirectionalLight DirectionalLights] for calculating shadows.<br /><br />
+			This is used internally by [page:DirectionalLight DirectionalLights] for calculating shadows.<br /><br />
 
 			Unlike the other shadow classes, this uses an [page:OrthographicCamera] to calculate the shadows,
 			rather than a [page:PerspectiveCamera]. This is because light rays from a [page:DirectionalLight]
@@ -37,8 +37,8 @@ scene.add( light );
 //Set up shadow properties for the light
 light.shadow.mapSize.width = 512;  // default
 light.shadow.mapSize.height = 512; // default
-light.shadow.camera.near = 0.5;       // default
-light.shadow.camera.far = 500      // default
+light.shadow.camera.near = 0.5;    // default
+light.shadow.camera.far = 500;     // default
 
 //Create a sphere that cast shadows (but does not receive them)
 var sphereGeometry = new THREE.SphereBufferGeometry( 5, 32, 32 );

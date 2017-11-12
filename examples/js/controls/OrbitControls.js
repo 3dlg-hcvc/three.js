@@ -98,6 +98,14 @@ THREE.OrbitControls = function ( object, domElement ) {
 
 	};
 
+	this.saveState = function () {
+
+		scope.target0.copy( scope.target );
+		scope.position0.copy( scope.object.position );
+		scope.zoom0 = scope.object.zoom;
+
+	};
+
 	this.reset = function () {
 
 		scope.target.copy( scope.target0 );
@@ -364,11 +372,11 @@ THREE.OrbitControls = function ( object, domElement ) {
 
 	function dollyIn( dollyScale ) {
 
-		if ( scope.object instanceof THREE.PerspectiveCamera ) {
+		if ( scope.object.isPerspectiveCamera ) {
 
 			scale /= dollyScale;
 
-		} else if ( scope.object instanceof THREE.OrthographicCamera ) {
+		} else if ( scope.object.isOrthographicCamera ) {
 
 			scope.object.zoom = Math.max( scope.minZoom, Math.min( scope.maxZoom, scope.object.zoom * dollyScale ) );
 			scope.object.updateProjectionMatrix();
@@ -395,11 +403,11 @@ THREE.OrbitControls = function ( object, domElement ) {
 
 	function dollyOut( dollyScale ) {
 
-		if ( scope.object instanceof THREE.PerspectiveCamera ) {
+		if ( scope.object.isPerspectiveCamera ) {
 
 			scale *= dollyScale;
 
-		} else if ( scope.object instanceof THREE.OrthographicCamera ) {
+		} else if ( scope.object.isOrthographicCamera ) {
 
 			scope.object.zoom = Math.max( scope.minZoom, Math.min( scope.maxZoom, scope.object.zoom / dollyScale ) );
 			scope.object.updateProjectionMatrix();
@@ -678,32 +686,40 @@ THREE.OrbitControls = function ( object, domElement ) {
 
 		event.preventDefault();
 
-		// NOTE(MS): Allow setting of Shift as modifier for panning
-		var isPan = (event.button === scope.mouseButtons.PAN) && (!scope.panRequiresShift || event.shiftKey);
+		switch ( event.button ) {
 
-		if ( event.button === scope.mouseButtons.ORBIT && !isPan) {
+			case scope.mouseButtons.ORBIT:
 
-			if ( scope.enableRotate === false ) return;
+				if ( scope.enableRotate === false ) return;
 
-			handleMouseDownRotate( event );
+				handleMouseDownRotate( event );
 
-			state = STATE.ROTATE;
+				state = STATE.ROTATE;
 
-		} else if ( event.button === scope.mouseButtons.ZOOM ) {
+				break;
 
-			if ( scope.enableZoom === false ) return;
+			case scope.mouseButtons.ZOOM:
 
-			handleMouseDownDolly( event );
+				if ( scope.enableZoom === false ) return;
 
-			state = STATE.DOLLY;
+				handleMouseDownDolly( event );
 
-		} else if ( isPan ) {
+				state = STATE.DOLLY;
 
-			if ( scope.enablePan === false ) return;
+				break;
 
-			handleMouseDownPan( event );
+			case scope.mouseButtons.PAN:
 
-			state = STATE.PAN;
+				if ( scope.enablePan === false ) return;
+
+				// NOTE(MS): Allow setting of Shift as modifier for panning
+				if ( scope.panRequiresShift && !event.shiftKey ) return;
+
+				handleMouseDownPan( event );
+
+				state = STATE.PAN;
+
+				break;
 
 		}
 
@@ -724,23 +740,31 @@ THREE.OrbitControls = function ( object, domElement ) {
 
 		event.preventDefault();
 
-		if ( state === STATE.ROTATE ) {
+		switch ( state ) {
 
-			if ( scope.enableRotate === false ) return;
+			case STATE.ROTATE:
 
-			handleMouseMoveRotate( event );
+				if ( scope.enableRotate === false ) return;
 
-		} else if ( state === STATE.DOLLY ) {
+				handleMouseMoveRotate( event );
 
-			if ( scope.enableZoom === false ) return;
+				break;
 
-			handleMouseMoveDolly( event );
+			case STATE.DOLLY:
 
-		} else if ( state === STATE.PAN ) {
+				if ( scope.enableZoom === false ) return;
 
-			if ( scope.enablePan === false ) return;
+				handleMouseMoveDolly( event );
 
-			handleMouseMovePan( event );
+				break;
+
+			case STATE.PAN:
+
+				if ( scope.enablePan === false ) return;
+
+				handleMouseMovePan( event );
+
+				break;
 
 		}
 
@@ -890,6 +914,8 @@ THREE.OrbitControls = function ( object, domElement ) {
 	}
 
 	function onContextMenu( event ) {
+
+		if ( scope.enabled === false ) return;
 
 		event.preventDefault();
 

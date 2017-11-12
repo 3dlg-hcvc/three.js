@@ -1,8 +1,14 @@
 /**
  * @author jonobr1 / http://jonobr1.com
+ * @author Mugen87 / https://github.com/Mugen87
  */
 
-import { Geometry } from '../core/Geometry';
+import { Geometry } from '../core/Geometry.js';
+import { BufferGeometry } from '../core/BufferGeometry.js';
+import { Float32BufferAttribute } from '../core/BufferAttribute.js';
+import { ShapeUtils } from '../extras/ShapeUtils.js';
+
+// ShapeGeometry
 
 function ShapeGeometry( shapes, curveSegments ) {
 
@@ -31,13 +37,7 @@ function ShapeGeometry( shapes, curveSegments ) {
 ShapeGeometry.prototype = Object.create( Geometry.prototype );
 ShapeGeometry.prototype.constructor = ShapeGeometry;
 
-/**
- * @author Mugen87 / https://github.com/Mugen87
- */
-
-import { Float32BufferAttribute } from '../core/BufferAttribute';
-import { BufferGeometry } from '../core/BufferGeometry';
-import { ShapeUtils } from '../extras/ShapeUtils';
+// ShapeBufferGeometry
 
 function ShapeBufferGeometry( shapes, curveSegments ) {
 
@@ -171,5 +171,6 @@ function ShapeBufferGeometry( shapes, curveSegments ) {
 
 ShapeBufferGeometry.prototype = Object.create( BufferGeometry.prototype );
 ShapeBufferGeometry.prototype.constructor = ShapeBufferGeometry;
+
 
 export { ShapeGeometry, ShapeBufferGeometry };
