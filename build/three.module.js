@@ -33506,6 +33506,9 @@ function Loader() {
 
 }
 
+// AXC: Added so THREE.js will report messages on deprecated stuff, but not so much!!!
+Loader.__reportedMessages = {};
+
 Loader.Handlers = {
 
 	handlers: [],
@@ -33591,7 +33594,11 @@ Object.assign( Loader.prototype, {
 			var textures = {};
 
 			function loadTexture( path, repeat, offset, wrap, anisotropy ) {
-
+				// AXC: Sometimes there is no path
+				if (!path) {
+					console.warn("No path when loading texture");
+					return;
+				}
 				var fullPath = texturePath + path;
 				var loader = Loader.Handlers.get( fullPath );
 
@@ -33607,6 +33614,8 @@ Object.assign( Loader.prototype, {
 					texture = textureLoader.load( fullPath );
 
 				}
+
+				texture.name = path;  // AXC: Name of texture using path
 
 				if ( repeat !== undefined ) {
 
@@ -33651,7 +33660,7 @@ Object.assign( Loader.prototype, {
 
 			var json = {
 				uuid: _Math.generateUUID(),
-				type: 'MeshLambertMaterial'
+				type: 'MeshPhysicalMaterial'  // NOTE(MS): MeshLambertMaterial breaks light shadow mapping
 			};
 
 			for ( var name in m ) {
@@ -33673,7 +33682,10 @@ Object.assign( Loader.prototype, {
 						break;
 					case 'colorAmbient':
 					case 'mapAmbient':
-						console.warn( 'THREE.Loader.createMaterial:', name, 'is no longer supported.' );
+						if (!THREE.Loader.__reportedMessages['mapAmbient']) {   // AXC: Make reporting of these messages quieter
+							console.warn( 'THREE.Loader.createMaterial:', name, 'is no longer supported.' );
+							THREE.Loader.__reportedMessages['mapAmbient'] = true;
+						}
 						break;
 					case 'colorDiffuse':
 						json.color = color.fromArray( value ).getHex();
@@ -33785,7 +33797,10 @@ Object.assign( Loader.prototype, {
 						json.side = DoubleSide;
 						break;
 					case 'transparency':
-						console.warn( 'THREE.Loader.createMaterial: transparency has been renamed to opacity' );
+						if (!THREE.Loader.__reportedMessages['transparency renamed']) {   // AXC: Make reporting of these messages quieter
+							console.warn( 'THREE.Loader.createMaterial: transparency has been renamed to opacity' );
+							THREE.Loader.__reportedMessages['transparency renamed'] = true;
+						}
 						json.opacity = value;
 						break;
 					case 'depthTest':
@@ -33803,7 +33818,10 @@ Object.assign( Loader.prototype, {
 						if ( value === 'face' ) json.vertexColors = FaceColors;
 						break;
 					default:
-						console.error( 'THREE.Loader.createMaterial: Unsupported', name, value );
+						if (!THREE.Loader.__reportedMessages['unsupported ' + name]) {   // AXC: Make reporting of these messages quieter
+							console.error( 'THREE.Loader.createMaterial: Unsupported', name, value );
+							THREE.Loader.__reportedMessages['unsupported ' + name] = true;
+						}
 						break;
 
 				}
