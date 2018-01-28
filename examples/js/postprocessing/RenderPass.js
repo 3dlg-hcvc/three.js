@@ -25,7 +25,10 @@ THREE.RenderPass.prototype = {
 
 	render: function ( renderer, writeBuffer, readBuffer, delta ) {
 
-		this.scene.overrideMaterial = this.overrideMaterial;
+		// AXC: Save oldOverrideMaterial so it can be restored
+		// AXC: also keep with scene overrideMaterial if our own overrideMaterial not specified
+		var oldOverrideMaterial = this.scene.overrideMaterial;
+		this.scene.overrideMaterial = (this.overrideMaterial !== undefined)? this.overrideMaterial : oldOverrideMaterial;
 
 		if ( this.clearColor ) {
 
@@ -44,7 +47,8 @@ THREE.RenderPass.prototype = {
 
 		}
 
-		this.scene.overrideMaterial = null;
+		// AXC: Restore oldOverrideMaterial
+		this.scene.overrideMaterial = oldOverrideMaterial;
 
 	}
 
