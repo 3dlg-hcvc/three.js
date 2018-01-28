@@ -88,6 +88,8 @@ THREE.BokehPass.prototype = Object.assign( Object.create( THREE.Pass.prototype )
 
 		// Render depth into texture
 
+		// AXC: Save oldOverrideMaterial so it can be restored
+		var oldOverrideMaterial = this.scene.overrideMaterial;
 		this.scene.overrideMaterial = this.materialDepth;
 
 		this.oldClearColor.copy( renderer.getClearColor() );
@@ -115,11 +117,11 @@ THREE.BokehPass.prototype = Object.assign( Object.create( THREE.Pass.prototype )
 
 		}
 
-		this.scene.overrideMaterial = null;
+		// AXC: Restore oldOverrideMaterial
+		this.scene.overrideMaterial = oldOverrideMaterial;
 		renderer.setClearColor( this.oldClearColor );
 		renderer.setClearAlpha( this.oldClearAlpha );
 		renderer.autoClear = this.oldAutoClear;
-	
 	}
 
 } );
