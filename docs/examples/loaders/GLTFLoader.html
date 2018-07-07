@@ -60,7 +60,7 @@
 				gltf.asset; // Object
 
 			},
-			// called when loading is in progresses
+			// called while loading is progressing
 			function ( xhr ) {
 
 				console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
@@ -83,6 +83,28 @@
 		which are not supported in IE11. To use the loader in IE11, you must
 		<a href="https://github.com/stefanpenner/es6-promise">include a polyfill</a>
 		providing a Promise replacement.</p>
+
+		<h2>Custom extensions</h2>
+
+		<p>
+			Metadata from unknown extensions is preserved as “.userData.gltfExtensions” on Object3D, Scene, and Material instances,
+			or attached to the response “gltf” object. Example:
+		</p>
+
+		<code>
+		loader.load('foo.gltf', function ( gltf ) {
+
+			var scene = gltf.scene;
+
+			var mesh = scene.children[ 3 ];
+
+			var fooExtension = mesh.userData.gltfExtensions.EXT_foo;
+
+			gltf.parser.getDependency( 'bufferView', fooExtension.bufferView )
+				.then( function ( fooBuffer ) { ... } );
+
+		} );
+		</code>
 
 		<br>
 		<hr>
