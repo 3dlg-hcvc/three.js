@@ -14096,7 +14096,7 @@ Object.assign( Triangle.prototype, {
 		if ( target === undefined ) {
 
 			console.warn( 'THREE.Triangle: .getPlane() target is now required' );
-			target = new Vector3();
+			target = new Plane();
 
 		}
 
