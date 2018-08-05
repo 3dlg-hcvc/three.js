@@ -353,9 +353,11 @@ THREE.SAOPass.prototype = Object.assign( Object.create( THREE.Pass.prototype ), 
 
 		}
 
+		// AXC: Save oldOverrideMaterial so it can be restored
+		var oldOverrideMaterial = this.scene.overrideMaterial;
 		this.scene.overrideMaterial = overrideMaterial;
 		renderer.render( this.scene, this.camera, renderTarget, clearNeeded );
-		this.scene.overrideMaterial = null;
+		this.scene.overrideMaterial = oldOverrideMaterial;
 
 		// restore original state
 		renderer.autoClear = originalAutoClear;

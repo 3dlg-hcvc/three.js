@@ -13,6 +13,11 @@
 
 THREE.SSAOShader = {
 
+	// AXC: accommodate perspective and orthographic cameras
+	defines: {
+		'PERSPECTIVE_CAMERA': 1
+	},
+
 	uniforms: {
 
 		"tDiffuse":     { value: null },
@@ -109,9 +114,10 @@ THREE.SSAOShader = {
 
 		"float readDepth( const in vec2 coord ) {",
 
-			"float cameraFarPlusNear = cameraFar + cameraNear;",
-			"float cameraFarMinusNear = cameraFar - cameraNear;",
-			"float cameraCoef = 2.0 * cameraNear;",
+			// AXC - use depth 
+			//"float cameraFarPlusNear = cameraFar + cameraNear;",
+			//"float cameraFarMinusNear = cameraFar - cameraNear;",
+			//"float cameraCoef = 2.0 * cameraNear;",
 
 			"#ifdef USE_LOGDEPTHBUF",
 
@@ -125,8 +131,14 @@ THREE.SSAOShader = {
 
 			"#endif",
 
-			"return cameraCoef / ( cameraFarPlusNear - z * cameraFarMinusNear );",
+			// "return cameraCoef / ( cameraFarPlusNear - z * cameraFarMinusNear );",
 
+			// AXC: use perspectiveDepth function (this seems to work better)
+ 			"	#if PERSPECTIVE_CAMERA == 1",
+				"return  - perspectiveDepthToViewZ(z, cameraNear, cameraFar);",
+			"	#else",
+				"return  - orthographicDepthToViewZ(z, cameraNear, cameraFar);",
+			"	#endif",
 
 		"}",
 

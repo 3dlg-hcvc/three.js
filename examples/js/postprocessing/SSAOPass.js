@@ -52,6 +52,8 @@ THREE.SSAOPass = function ( scene, camera, width, height ) {
 	this.uniforms[ 'size' ].value.set( this.width, this.height );
 	this.uniforms[ 'cameraNear' ].value = this.camera2.near;
 	this.uniforms[ 'cameraFar' ].value = this.camera2.far;
+	// AXC: Switch for perspective camera
+	this.material.defines[ 'PERSPECTIVE_CAMERA' ] = this.camera2.isPerspectiveCamera ? 1 : 0;
 
 	this.uniforms[ 'radius' ].value = 4;
 	this.uniforms[ 'onlyAO' ].value = false;
@@ -100,11 +102,13 @@ THREE.SSAOPass.prototype = Object.create( THREE.ShaderPass.prototype );
 THREE.SSAOPass.prototype.render = function( renderer, writeBuffer, readBuffer, delta, maskActive ) {
 
 	//Render depth into depthRenderTarget
+	// AXC: Save oldOverrideMaterial so it can be restored
+	var oldOverrideMaterial = this.scene.overrideMaterial;
 	this.scene2.overrideMaterial = this.depthMaterial;
 	
 	renderer.render( this.scene2, this.camera2, this.depthRenderTarget, true );
 	
-	this.scene2.overrideMaterial = null;
+	this.scene2.overrideMaterial = oldOverrideMaterial;
 
 
 	//SSAO shaderPass
@@ -136,6 +140,8 @@ THREE.SSAOPass.prototype.setCamera = function( camera ) {
 
 	this.uniforms[ 'cameraNear' ].value = this.camera2.near;
 	this.uniforms[ 'cameraFar' ].value = this.camera2.far;
+	// AXC: switch for perspective camera
+	this.material.defines[ 'PERSPECTIVE_CAMERA' ] = (this.camera2.isPerspectiveCamera || this.camera2.inPerspectiveMode)  ? 1 : 0;
 
 };
 
