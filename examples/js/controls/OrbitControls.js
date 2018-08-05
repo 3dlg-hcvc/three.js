@@ -955,6 +955,13 @@ THREE.OrbitControls = function ( object, domElement ) {
 
 	this.update();
 
+	// AXC: Expose functions;
+	this.panLeft = function (delta) { pan(delta,0); };
+	this.panUp = function (delta) { pan(0,delta); };
+	this.rotateLeft = rotateLeft;
+	this.rotateUp = rotateUp;
+	this.dollyIn = dollyIn;
+	this.dollyOut = dollyOut;
 };
 
 THREE.OrbitControls.prototype = Object.create( THREE.EventDispatcher.prototype );
