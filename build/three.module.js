@@ -45191,11 +45191,15 @@ function MeshFaceMaterial( materials ) {
 
 }
 
+var __warnedMultiMaterial = false;
 function MultiMaterial( materials ) {
 
 	if ( materials === undefined ) materials = [];
 
-	console.warn( 'THREE.MultiMaterial has been removed. Use an Array instead.' );
+	if (!__warnedMultiMaterial) {
+		console.warn( 'THREE.MultiMaterial has been removed. Use an Array instead.' );
+		__warnedMultiMaterial = true;
+	}
 	materials.isMultiMaterial = true;
 	materials.materials = materials;
 	materials.clone = function () {
