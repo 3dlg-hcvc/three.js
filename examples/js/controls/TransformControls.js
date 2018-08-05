@@ -283,6 +283,8 @@ THREE.TransformControls = function ( camera, domElement ) {
 			mouseDownEvent.mode = this.mode;
 			this.dispatchEvent( mouseDownEvent );
 
+			// AXC: Track event handled
+			return true;
 		}
 
 	}
@@ -479,23 +481,27 @@ THREE.TransformControls = function ( camera, domElement ) {
 		this.dispatchEvent( changeEvent );
 		this.dispatchEvent( objectChangeEvent );
 
+		// AXC: Track that we handled this
+		return true;
 	}
 
 	this.pointerUp = function( pointer ) {
 
 		if ( pointer.button !== undefined && pointer.button !== 0 ) return;
 
+		var handled = false; // AXC: track handled
 		if ( this.dragging && ( this.axis !== null ) ) {
 
 			mouseUpEvent.mode = this.mode;
 			this.dispatchEvent( mouseUpEvent );
-
+			handled = true; // AXC: track handled;
 		}
 
 		this.dragging = false;
 
 		if ( pointer.button === undefined ) this.axis = null;
 
+		return handled; // AXC: track handled
 	}
 
 	// normalize mouse / touch pointer and remap {x,y} to view space.
@@ -531,23 +537,27 @@ THREE.TransformControls = function ( camera, domElement ) {
 	}
 
 	function onPointerDown( event ) {
-
-		event.preventDefault();
-		event.stopImmediatePropagation();
-		event.stopPropagation();
-
 		scope.pointerHover( getPointer( event ) );
-		scope.pointerDown( getPointer( event ) );
 
+        // AXC: track handled
+		var handled = scope.pointerDown( getPointer( event ) );
+
+		if (handled) {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            event.stopPropagation();
+        }
 	}
 
 	function onPointerMove( event ) {
 
-		event.preventDefault();
-        event.stopImmediatePropagation();
-		event.stopPropagation();
-
-		scope.pointerMove( getPointer( event ) );
+		// AXC: track handled
+		var handled = scope.pointerMove( getPointer( event ) );
+		if (handled) {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            event.stopPropagation();
+        }
 
 	}
 
@@ -555,8 +565,12 @@ THREE.TransformControls = function ( camera, domElement ) {
 
 		event.preventDefault(); // Prevent MouseEvent on mobile
 
-		scope.pointerUp( getPointer( event ) );
+		var handled = scope.pointerUp( getPointer( event ) );
 
+        if (handled) {
+            event.stopImmediatePropagation();
+            event.stopPropagation();
+        }
 	}
 
 	// TODO: depricate
