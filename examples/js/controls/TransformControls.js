@@ -533,6 +533,7 @@ THREE.TransformControls = function ( camera, domElement ) {
 	function onPointerDown( event ) {
 
 		event.preventDefault();
+		event.stopImmediatePropagation();
 		event.stopPropagation();
 
 		scope.pointerHover( getPointer( event ) );
@@ -543,6 +544,7 @@ THREE.TransformControls = function ( camera, domElement ) {
 	function onPointerMove( event ) {
 
 		event.preventDefault();
+        event.stopImmediatePropagation();
 		event.stopPropagation();
 
 		scope.pointerMove( getPointer( event ) );
