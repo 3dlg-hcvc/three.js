@@ -74,10 +74,15 @@ THREE.OrbitControls = function ( object, domElement ) {
 	// The four arrow keys
 	this.keys = { LEFT: 37, UP: 38, RIGHT: 39, BOTTOM: 40 };
 
-	// Mouse buttons
-	this.mouseButtons = { LEFT: THREE.MOUSE.LEFT, MIDDLE: THREE.MOUSE.MIDDLE, RIGHT: THREE.MOUSE.RIGHT };
+	this.actions = Object.freeze({ ORBIT: 0, ZOOM: 1, PAN: 2 });
 
-	this.panRequiresShift = false;
+	// AXC: more generic mouse mappings
+	this.mouseMappings = [
+		{ action: this.actions.PAN,    button: THREE.MOUSE.LEFT, keys: ['ctrlKey', 'metaKey'] },
+		{ action: this.actions.ORBIT,  button: THREE.MOUSE.LEFT },
+		{ action: this.actions.ZOOM,   button: THREE.MOUSE.MIDDLE },
+		{ action: this.actions.PAN,    button: THREE.MOUSE.RIGHT }
+	];
 
 	// for reset
 	this.target0 = this.target.clone();
@@ -699,53 +704,56 @@ THREE.OrbitControls = function ( object, domElement ) {
 
 		event.preventDefault();
 
-		switch ( event.button ) {
+		// AXC: more generic mouse mappings
+		for (var i = 0; i < scope.mouseMappings.length; i++) {
+			var mouseMapping = scope.mouseMappings[i];
 
-			case scope.mouseButtons.LEFT:
-
-				if ( event.ctrlKey || event.metaKey ) {
-
-					if ( scope.enablePan === false ) return;
-
-					handleMouseDownPan( event );
-
-					state = STATE.PAN;
-
-				} else {
-
-					if ( scope.enableRotate === false ) return;
-
-					handleMouseDownRotate( event );
-
-					state = STATE.ROTATE;
-
+			// Check if mouse mapping activates
+			var activated = mouseMapping.button === event.button;
+			if (mouseMapping.keys && activated) {
+				activated = false;
+				for (var j = 0; j < mouseMapping.keys.length; j++) {
+					var key = mouseMapping.keys[j];
+					if (event[key]) {
+						activated = true;
+						break;
+					}
 				}
+			}
 
+			if (!activated) { continue; }
+
+			var handled = false;
+			switch ( mouseMapping.action ) {
+
+				case scope.actions.ORBIT:
+					if ( scope.enableRotate !== false ) {
+						handleMouseDownRotate( event );
+						state = STATE.ROTATE;
+						handled = true;
+					}
+					break;
+
+				case scope.actions.ZOOM:
+					if ( scope.enableZoom !== false ) {
+						handleMouseDownDolly( event );
+						state = STATE.DOLLY;
+						handled = true;
+					}
+					break;
+
+				case scope.actions.PAN:
+					if ( scope.enablePan !== false ) {
+						handleMouseDownPan( event );
+						state = STATE.PAN;
+						handled = true;
+					}
+					break;
+			}
+			
+			if (handled) {
 				break;
-
-			case scope.mouseButtons.MIDDLE:
-
-				if ( scope.enableZoom === false ) return;
-
-				handleMouseDownDolly( event );
-
-				state = STATE.DOLLY;
-
-				break;
-
-			case scope.mouseButtons.RIGHT:
-
-				if ( scope.enablePan === false ) return;
-
-				// NOTE(MS): Allow setting of Shift as modifier for panning
-				if ( scope.panRequiresShift && !event.shiftKey ) return;
-
-				handleMouseDownPan( event );
-
-				state = STATE.PAN;
-
-				break;
-
+			}
 		}
 
 		if ( state !== STATE.NONE ) {
