@@ -33,7 +33,7 @@ Object.assign( TextureLoader.prototype, {
 			// AXC: Comment out check for jpeg and setting of texture.format 
 			//      Breaks rendering of textures in headless mode
 			// JPEGs can't have an alpha channel, so memory can be saved by storing them as RGB.
-			//var isJPEG = url.search( /\.(jpg|jpeg)$/ ) > 0 || url.search( /^data\:image\/jpeg/ ) === 0;
+			//var isJPEG = url.search( /\.jpe?g$/i ) > 0 || url.search( /^data\:image\/jpeg/ ) === 0;
 
 			//texture.format = isJPEG ? RGBFormat : RGBAFormat;
 
