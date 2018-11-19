@@ -39422,7 +39422,7 @@
 	 * @author alteredq / http://alteredqualia.com/
 	 */
 
-	function CubeCamera( near, far, cubeResolution ) {
+	function CubeCamera( near, far, cubeResolution, options ) {
 
 		Object3D.call( this );
 
@@ -39460,7 +39460,7 @@
 		cameraNZ.lookAt( new Vector3( 0, 0, - 1 ) );
 		this.add( cameraNZ );
 
-		var options = { format: RGBFormat, magFilter: LinearFilter, minFilter: LinearFilter };
+		options = options || { format: RGBFormat, magFilter: LinearFilter, minFilter: LinearFilter };
 
 		this.renderTarget = new WebGLRenderTargetCube( cubeResolution, cubeResolution, options );
 		this.renderTarget.texture.name = "CubeCamera";
@@ -39529,13 +39529,16 @@
 				this.matrix.decompose(this.position, this.quaternion, this.scale);
 				this.matrixWorldNeedsUpdate = true;  // make sure matrixWorldNeedsUpdate is set
 			}
+			this.updateMatrixWorld();
 
 			this.near = source.near;
 			this.far = source.far;
+			var sv = new THREE.Vector3();
+			var scale = 1.0 / this.getWorldScale(sv).length();
 			this.children.forEach(function(c) {
 				if (c.near !== source.near || c.far !== source.far) {
-					c.near = source.near;
-					c.far = source.far;
+					c.near = scale*source.near;
+					c.far = scale*source.far;
 					c.updateProjectionMatrix();
 				}
 			});
