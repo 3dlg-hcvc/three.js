@@ -2543,6 +2543,10 @@ function WebGLRenderer( parameters ) {
 		}
 
 		var framebuffer = properties.get( renderTarget ).__webglFramebuffer;
+		if ( renderTarget.isWebGLRenderTargetCube ) {
+
+			framebuffer = framebuffer[ renderTarget.activeCubeFace ];
+		}
 
 		if ( framebuffer ) {
 

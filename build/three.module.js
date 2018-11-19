@@ -24227,6 +24227,10 @@ function WebGLRenderer( parameters ) {
 		}
 
 		var framebuffer = properties.get( renderTarget ).__webglFramebuffer;
+		if ( renderTarget.isWebGLRenderTargetCube ) {
+
+			framebuffer = framebuffer[ renderTarget.activeCubeFace ];
+		}
 
 		if ( framebuffer ) {
 
@@ -39503,6 +39507,32 @@ function CubeCamera( near, far, cubeResolution ) {
 
 		renderer.setRenderTarget( null );
 
+	};
+
+	this.setFromCamera = function( source, useLocal ) {
+		this.up.copy( source.up );
+
+		if (useLocal) {
+			this.position.copy( source.position );
+			this.quaternion.copy( source.quaternion );
+			this.scale.copy( source.scale );
+
+			this.matrix.copy( source.matrix );
+		} else {
+			this.matrix.copy( source.matrixWorld );
+			this.matrix.decompose(this.position, this.quaternion, this.scale);
+			this.matrixWorldNeedsUpdate = true;  // make sure matrixWorldNeedsUpdate is set
+		}
+
+		this.near = source.near;
+		this.far = source.far;
+		this.children.forEach(function(c) {
+			if (c.near !== source.near || c.far !== source.far) {
+				c.near = source.near;
+				c.far = source.far;
+				c.updateProjectionMatrix();
+			}
+		});
 	};
 
 }
