@@ -39142,6 +39142,7 @@
 
 	// AXC: Added so THREE.js will report messages on deprecated stuff, but not so much!!!
 	Loader.__reportedMessages = {};
+	Loader.DefaultMaterialType = 'MeshPhysicalMaterial';  // NOTE(MS): MeshLambertMaterial breaks light shadow mapping
 
 	Loader.Handlers = {
 
@@ -39288,7 +39289,7 @@
 
 				var json = {
 					uuid: _Math.generateUUID(),
-					type: 'MeshPhysicalMaterial'  // NOTE(MS): MeshLambertMaterial breaks light shadow mapping
+					type: Loader.DefaultMaterialType             // AXC: Have a default material
 				};
 
 				for ( var name in m ) {
