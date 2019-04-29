@@ -5546,7 +5546,7 @@
 	 * @author bhouston / http://clara.io
 	 */
 
-	function Plane$1( normal, constant ) {
+	function Plane( normal, constant ) {
 
 		// normal is assumed to be normalized
 
@@ -5555,7 +5555,7 @@
 
 	}
 
-	Object.assign( Plane$1.prototype, {
+	Object.assign( Plane.prototype, {
 
 		set: function ( normal, constant ) {
 
@@ -5792,12 +5792,12 @@
 
 		this.planes = [
 
-			( p0 !== undefined ) ? p0 : new Plane$1(),
-			( p1 !== undefined ) ? p1 : new Plane$1(),
-			( p2 !== undefined ) ? p2 : new Plane$1(),
-			( p3 !== undefined ) ? p3 : new Plane$1(),
-			( p4 !== undefined ) ? p4 : new Plane$1(),
-			( p5 !== undefined ) ? p5 : new Plane$1()
+			( p0 !== undefined ) ? p0 : new Plane(),
+			( p1 !== undefined ) ? p1 : new Plane(),
+			( p2 !== undefined ) ? p2 : new Plane(),
+			( p3 !== undefined ) ? p3 : new Plane(),
+			( p4 !== undefined ) ? p4 : new Plane(),
+			( p5 !== undefined ) ? p5 : new Plane()
 
 		];
 
@@ -14930,7 +14930,7 @@
 			localClippingEnabled = false,
 			renderingShadows = false,
 
-			plane = new Plane$1(),
+			plane = new Plane(),
 			viewNormalMatrix = new Matrix3(),
 
 			uniform = { value: null, needsUpdate: false };
@@ -36826,6 +36826,7 @@
 
 	// AXC: Added so THREE.js will report messages on deprecated stuff, but not so much!!!
 	Loader.__reportedMessages = {};
+	Loader.DefaultMaterialType = 'MeshPhysicalMaterial';  // NOTE(MS): MeshLambertMaterial breaks light shadow mapping
 
 	Loader.Handlers = {
 
@@ -36972,7 +36973,7 @@
 
 				var json = {
 					uuid: _Math.generateUUID(),
-					type: 'MeshPhysicalMaterial'  // NOTE(MS): MeshLambertMaterial breaks light shadow mapping
+					type: Loader.DefaultMaterialType             // AXC: Have a default material
 				};
 
 				for ( var name in m ) {
@@ -45813,7 +45814,7 @@
 
 	} );
 
-	Plane$1.prototype.isIntersectionLine = function ( line ) {
+	Plane.prototype.isIntersectionLine = function ( line ) {
 
 		console.warn( 'THREE.Plane: .isIntersectionLine() has been renamed to .intersectsLine().' );
 		return this.intersectsLine( line );
@@ -47116,7 +47117,7 @@
 	exports.Math = _Math;
 	exports.Spherical = Spherical;
 	exports.Cylindrical = Cylindrical;
-	exports.Plane = Plane$1;
+	exports.Plane = Plane;
 	exports.Frustum = Frustum;
 	exports.Sphere = Sphere;
 	exports.Ray = Ray;

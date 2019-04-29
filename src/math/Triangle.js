@@ -1,4 +1,5 @@
 import { Vector3 } from './Vector3.js';
+import { Plane } from './Plane.js';
 
 /**
  * @author bhouston / http://clara.io
