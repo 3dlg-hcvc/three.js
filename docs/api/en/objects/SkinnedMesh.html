@@ -65,8 +65,8 @@
 
 		}
 
-		geometry.addAttribute( 'skinIndex', new THREE.Uint16BufferAttribute( skinIndices, 4 ) );
-		geometry.addAttribute( 'skinWeight', new THREE.Float32BufferAttribute( skinWeights, 4 ) );
+		geometry.setAttribute( 'skinIndex', new THREE.Uint16BufferAttribute( skinIndices, 4 ) );
+		geometry.setAttribute( 'skinWeight', new THREE.Float32BufferAttribute( skinWeights, 4 ) );
 
 		// create skinned mesh and skeleton
 
@@ -91,8 +91,8 @@
 		<h2>Constructor</h2>
 		<h3>[name]( [param:BufferGeometry geometry], [param:Material material] )</h3>
 		<p>
-    [page:Geometry geometry] - an instance of [page:BufferGeometry].<br />
-    [page:Material material] - (optional) an instance of [page:Material]. Default is a new [page:MeshBasicMaterial].
+		[page:Geometry geometry] - an instance of [page:BufferGeometry].<br />
+		[page:Material material] - (optional) an instance of [page:Material]. Default is a new [page:MeshBasicMaterial].
 		</p>
 
 
@@ -128,7 +128,7 @@
 
 		<h3>[property:Skeleton skeleton]</h3>
 		<p>
-		[page:Skeleton] representing the bone hierachy of the skinned mesh.
+		[page:Skeleton] representing the bone hierarchy of the skinned mesh.
 		</p>
 
 
@@ -167,6 +167,8 @@
 
 		<h2>Source</h2>
 
-		[link:https://github.com/mrdoob/three.js/blob/master/src/[path].js src/[path].js]
+		<p>
+			[link:https://github.com/mrdoob/three.js/blob/master/src/[path].js src/[path].js]
+		</p>
 	</body>
 </html>
