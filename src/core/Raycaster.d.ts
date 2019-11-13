@@ -61,6 +61,11 @@ export class Raycaster {
 	 */
 	camera: Camera;
 
+	/**
+	 * Whether to intersect backfaces
+	 */
+	intersectBackFaces: boolean;
+
 	params: RaycasterParameters;
 
 	/**

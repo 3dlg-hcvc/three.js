@@ -14,6 +14,8 @@ function Raycaster( origin, direction, near, far ) {
 	this.near = near || 0;
 	this.far = far || Infinity;
 	this.camera = null;
+	// AXC: Whether to intersect backfaces as well
+	this.intersectBackFaces = false;
 
 	this.params = {
 		Mesh: {},

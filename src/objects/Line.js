@@ -237,7 +237,7 @@ Line.prototype = Object.assign( Object.create( Object3D.prototype ), {
 
 	copy: function ( source, recursive ) {
 
-		Object3D.prototype.copy.call( this, source, recursive );
+		return Object3D.prototype.copy.call( this, source, recursive );
 	},
 
 	clone: function (recursive) {

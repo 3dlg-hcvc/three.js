@@ -372,11 +372,11 @@ function checkIntersection( object, material, raycaster, ray, pA, pB, pC, point 
 
 	if ( material.side === BackSide ) {
 
-		intersect = ray.intersectTriangle( pC, pB, pA, true, point );
+		intersect = ray.intersectTriangle( pC, pB, pA, !raycaster.intersectBackFaces && true, point );
 
 	} else {
 
-		intersect = ray.intersectTriangle( pA, pB, pC, material.side !== DoubleSide, point );
+		intersect = ray.intersectTriangle( pA, pB, pC, !raycaster.intersectBackFaces && material.side !== DoubleSide, point );
 
 	}
 

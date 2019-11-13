@@ -11334,11 +11334,11 @@ function checkIntersection( object, material, raycaster, ray, pA, pB, pC, point 
 
 	if ( material.side === BackSide ) {
 
-		intersect = ray.intersectTriangle( pC, pB, pA, true, point );
+		intersect = ray.intersectTriangle( pC, pB, pA, !raycaster.intersectBackFaces && true, point );
 
 	} else {
 
-		intersect = ray.intersectTriangle( pA, pB, pC, material.side !== DoubleSide, point );
+		intersect = ray.intersectTriangle( pA, pB, pC, !raycaster.intersectBackFaces && material.side !== DoubleSide, point );
 
 	}
 
@@ -27569,7 +27569,7 @@ Line.prototype = Object.assign( Object.create( Object3D.prototype ), {
 
 	copy: function ( source, recursive ) {
 
-		Object3D.prototype.copy.call( this, source, recursive );
+		return Object3D.prototype.copy.call( this, source, recursive );
 	},
 
 	clone: function (recursive) {
@@ -45253,6 +45253,8 @@ function Raycaster( origin, direction, near, far ) {
 	this.near = near || 0;
 	this.far = far || Infinity;
 	this.camera = null;
+	// AXC: Whether to intersect backfaces as well
+	this.intersectBackFaces = false;
 
 	this.params = {
 		Mesh: {},
