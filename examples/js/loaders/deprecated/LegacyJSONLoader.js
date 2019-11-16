@@ -286,6 +286,11 @@ THREE.LegacyJSONLoader = ( function () {
 			}
 
 			function loadTexture( path, repeat, offset, wrap, anisotropy, textures, texturePath, crossOrigin, manager ) {
+				// AXC: Sometimes there is no path
+				if (!path) {
+					console.warn("No path when loading texture");
+					return;
+				}
 
 				var fullPath = texturePath + path;
 				var loader = manager.getHandler( fullPath );
