@@ -16,10 +16,11 @@ var CSS3DObject = function ( element ) {
 
 	this.element = element;
 	this.element.style.position = 'absolute';
+	this.element.style.pointerEvents = 'auto';
 
 	this.addEventListener( 'removed', function () {
 
-		this.traverse( function( object ) {
+		this.traverse( function ( object ) {
 
 			if ( object.element instanceof Element && object.element.parentNode !== null ) {
 
@@ -68,6 +69,7 @@ var CSS3DRenderer = function () {
 
 	cameraElement.style.WebkitTransformStyle = 'preserve-3d';
 	cameraElement.style.transformStyle = 'preserve-3d';
+	cameraElement.style.pointerEvents = 'none';
 
 	domElement.appendChild( cameraElement );
 
@@ -300,8 +302,7 @@ var CSS3DRenderer = function () {
 
 		}
 
-		scene.updateMatrixWorld();
-
+		if ( scene.autoUpdate === true ) scene.updateMatrixWorld();
 		if ( camera.parent === null ) camera.updateMatrixWorld();
 
 		if ( camera.isOrthographicCamera ) {
