@@ -23,17 +23,29 @@ import { VRMLLoader } from '../../examples/jsm/loaders/VRMLLoader.js';
 import { AddObjectCommand } from './commands/AddObjectCommand.js';
 import { SetSceneCommand } from './commands/SetSceneCommand.js';
 
+import { LoaderUtils } from './LoaderUtils.js';
+
 var Loader = function ( editor ) {
 
 	var scope = this;
 
 	this.texturePath = '';
 
-	this.loadFiles = function ( files ) {
+	this.loadItemList = function ( items ) {
+
+		LoaderUtils.getFilesFromItemList( items, function ( files, filesMap ) {
+
+			scope.loadFiles( files, filesMap );
+
+		} );
+
+	};
+
+	this.loadFiles = function ( files, filesMap ) {
 
 		if ( files.length > 0 ) {
 
-			var filesMap = createFileMap( files );
+			var filesMap = filesMap || LoaderUtils.createFilesMap( files );
 
 			var manager = new THREE.LoadingManager();
 			manager.setURLModifier( function ( url ) {
@@ -207,7 +219,11 @@ var Loader = function ( editor ) {
 
 					} else {
 
+						var dracoLoader = new DRACOLoader();
+						dracoLoader.setDecoderPath( '../examples/js/libs/draco/gltf/' );
+
 						loader = new GLTFLoader( manager );
+						loader.setDRACOLoader( dracoLoader );
 
 					}
 
@@ -540,17 +556,19 @@ var Loader = function ( editor ) {
 				var loader = new THREE.ObjectLoader();
 				loader.setResourcePath( scope.texturePath );
 
-				var result = loader.parse( data );
+				loader.parse( data, function ( result ) {
 
-				if ( result.isScene ) {
+					if ( result.isScene ) {
 
-					editor.execute( new SetSceneCommand( editor, result ) );
+						editor.execute( new SetSceneCommand( editor, result ) );
 
-				} else {
+					} else {
 
-					editor.execute( new AddObjectCommand( editor, result ) );
+						editor.execute( new AddObjectCommand( editor, result ) );
 
-				}
+					}
+
+				} );
 
 				break;
 
@@ -561,21 +579,6 @@ var Loader = function ( editor ) {
 				break;
 
 		}
-
-	}
-
-	function createFileMap( files ) {
-
-		var map = {};
-
-		for ( var i = 0; i < files.length; i ++ ) {
-
-			var file = files[ i ];
-			map[ file.name ] = file;
-
-		}
-
-		return map;
 
 	}
 
