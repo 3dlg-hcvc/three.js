@@ -69,6 +69,11 @@ export class Raycaster {
 	intersectBackFaces: boolean;
 
 	/**
+	 * Whether to check objects that are not visible
+	 */
+	intersectNonVisible: boolean;
+
+	/**
 	 * Used by Raycaster to selectively ignore 3D objects when performing intersection tests.
 	 */
 	layers: Layers;

@@ -45432,6 +45432,9 @@ function Raycaster( origin, direction, near, far ) {
 	this.camera = null;
 	// AXC: Whether to intersect backfaces as well
 	this.intersectBackFaces = false;
+	// AXC: Whether to intersect non visible objects
+	this.intersectNonVisible = false;
+
 	this.layers = new Layers();
 
 	this.params = {
@@ -45462,6 +45465,11 @@ function ascSort( a, b ) {
 }
 
 function intersectObject( object, raycaster, intersects, recursive ) {
+
+	// AXC: Skip objects that are not visible (unless we explicitly set intersectNonVisible to true)
+	if (!this.intersectNonVisible) {
+		if ( object.visible === false ) return;
+	}
 
 	if ( object.layers.test( raycaster.layers ) ) {
 
