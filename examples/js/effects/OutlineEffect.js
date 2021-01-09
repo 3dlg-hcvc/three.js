@@ -61,7 +61,14 @@ THREE.OutlineEffect = function ( renderer, parameters ) {
 	this.enabled = true;
 
 	var defaultThickness = parameters.defaultThickness !== undefined ? parameters.defaultThickness : 0.003;
-	var defaultColor = new THREE.Color().fromArray( parameters.defaultColor !== undefined ? parameters.defaultColor : [ 0, 0, 0 ] );
+	// AXC: More flexible color specification
+	var defaultColor = new THREE.Color();
+	var c = parameters.defaultColor !== undefined ? parameters.defaultColor : [ 0, 0, 0 ];
+	if (Array.isArray(c)) {
+		defaultColor.fromArray(c);
+	} else {
+		defaultColor.set(c);
+	}
 	var defaultAlpha = parameters.defaultAlpha !== undefined ? parameters.defaultAlpha : 1.0;
 	var defaultKeepAlive = parameters.defaultKeepAlive !== undefined ? parameters.defaultKeepAlive : false;
 
