@@ -1,7 +1,10 @@
-// r115
+// r124
 
 const assets = [
 	'./',
+
+	'./manifest.json',
+	'./images/icon.png',
 
 	'../files/favicon.ico',
 
@@ -11,13 +14,22 @@ const assets = [
 
 	'../examples/jsm/libs/chevrotain.module.min.js',
 	'../examples/jsm/libs/inflate.module.min.js',
+	'../examples/jsm/libs/jszip.module.min.js',
 
-	'../examples/js/libs/jszip.min.js',
 	'../examples/js/libs/draco/draco_decoder.js',
 	'../examples/js/libs/draco/draco_decoder.wasm',
 	'../examples/js/libs/draco/draco_encoder.js',
 	'../examples/js/libs/draco/draco_wasm_wrapper.js',
 
+	'../examples/js/libs/draco/gltf/draco_decoder.js',
+	'../examples/js/libs/draco/gltf/draco_decoder.wasm',
+	'../examples/js/libs/draco/gltf/draco_wasm_wrapper.js',
+
+	'../examples/jsm/libs/rhino3dm/rhino3dm.wasm',
+	'../examples/jsm/libs/rhino3dm/rhino3dm.js',
+
+	'../examples/jsm/loaders/3DMLoader.js',
+	'../examples/jsm/loaders/3MFLoader.js',
 	'../examples/jsm/loaders/AMFLoader.js',
 	'../examples/jsm/loaders/ColladaLoader.js',
 	'../examples/jsm/loaders/DRACOLoader.js',
@@ -33,8 +45,10 @@ const assets = [
 	'../examples/jsm/loaders/SVGLoader.js',
 	'../examples/jsm/loaders/TGALoader.js',
 	'../examples/jsm/loaders/TDSLoader.js',
+	'../examples/jsm/loaders/VOXLoader.js',
 	'../examples/jsm/loaders/VRMLLoader.js',
 	'../examples/jsm/loaders/VTKLoader.js',
+	'../examples/jsm/loaders/XYZLoader.js',
 
 	'../examples/jsm/curves/NURBSCurve.js',
 	'../examples/jsm/curves/NURBSUtils.js',
@@ -46,13 +60,15 @@ const assets = [
 	'../examples/jsm/exporters/PLYExporter.js',
 	'../examples/jsm/exporters/STLExporter.js',
 
+	'../examples/jsm/helpers/VertexNormalsHelper.js',
+
 	'../examples/jsm/geometries/TeapotBufferGeometry.js',
 
-	'../examples/js/vr/HelioWebXRPolyfill.js',
 	'../examples/jsm/webxr/VRButton.js',
 
-	'./manifest.json',
-	'./images/icon.png',
+	'./images/rotate.svg',
+	'./images/scale.svg',
+	'./images/translate.svg',
 
 	'./js/libs/codemirror/codemirror.css',
 	'./js/libs/codemirror/theme/monokai.css',
@@ -63,7 +79,6 @@ const assets = [
 
 	'./js/libs/esprima.js',
 	'./js/libs/jsonlint.js',
-	'./js/libs/glslprep.min.js',
 
 	'./js/libs/codemirror/addon/dialog.css',
 	'./js/libs/codemirror/addon/show-hint.css',
@@ -112,6 +127,7 @@ const assets = [
 	'./js/Menubar.Examples.js',
 	'./js/Menubar.Help.js',
 	'./js/Menubar.Status.js',
+	'./js/Resizer.js',
 	'./js/Sidebar.js',
 	'./js/Sidebar.Scene.js',
 	'./js/Sidebar.Project.js',
@@ -124,23 +140,23 @@ const assets = [
 	'./js/Sidebar.Geometry.Geometry.js',
 	'./js/Sidebar.Geometry.BufferGeometry.js',
 	'./js/Sidebar.Geometry.Modifiers.js',
-	'./js/Sidebar.Geometry.BoxGeometry.js',
-	'./js/Sidebar.Geometry.CircleGeometry.js',
-	'./js/Sidebar.Geometry.CylinderGeometry.js',
-	'./js/Sidebar.Geometry.DodecahedronGeometry.js',
-	'./js/Sidebar.Geometry.ExtrudeGeometry.js',
-	'./js/Sidebar.Geometry.IcosahedronGeometry.js',
-	'./js/Sidebar.Geometry.OctahedronGeometry.js',
-	'./js/Sidebar.Geometry.PlaneGeometry.js',
-	'./js/Sidebar.Geometry.RingGeometry.js',
-	'./js/Sidebar.Geometry.SphereGeometry.js',
-	'./js/Sidebar.Geometry.ShapeGeometry.js',
-	'./js/Sidebar.Geometry.TetrahedronGeometry.js',
-	'./js/Sidebar.Geometry.TorusGeometry.js',
-	'./js/Sidebar.Geometry.TorusKnotGeometry.js',
-	'./js/Sidebar.Geometry.TubeGeometry.js',
+	'./js/Sidebar.Geometry.BoxBufferGeometry.js',
+	'./js/Sidebar.Geometry.CircleBufferGeometry.js',
+	'./js/Sidebar.Geometry.CylinderBufferGeometry.js',
+	'./js/Sidebar.Geometry.DodecahedronBufferGeometry.js',
+	'./js/Sidebar.Geometry.ExtrudeBufferGeometry.js',
+	'./js/Sidebar.Geometry.IcosahedronBufferGeometry.js',
+	'./js/Sidebar.Geometry.LatheBufferGeometry.js',
+	'./js/Sidebar.Geometry.OctahedronBufferGeometry.js',
+	'./js/Sidebar.Geometry.PlaneBufferGeometry.js',
+	'./js/Sidebar.Geometry.RingBufferGeometry.js',
+	'./js/Sidebar.Geometry.SphereBufferGeometry.js',
+	'./js/Sidebar.Geometry.ShapeBufferGeometry.js',
+	'./js/Sidebar.Geometry.TetrahedronBufferGeometry.js',
+	'./js/Sidebar.Geometry.TorusBufferGeometry.js',
+	'./js/Sidebar.Geometry.TorusKnotBufferGeometry.js',
+	'./js/Sidebar.Geometry.TubeBufferGeometry.js',
 	'./js/Sidebar.Geometry.TeapotBufferGeometry.js',
-	'./js/Sidebar.Geometry.LatheGeometry.js',
 	'./js/Sidebar.Material.js',
 	'./js/Sidebar.Animation.js',
 	'./js/Sidebar.Script.js',
@@ -150,6 +166,7 @@ const assets = [
 	'./js/Viewport.js',
 	'./js/Viewport.Camera.js',
 	'./js/Viewport.Info.js',
+	'./js/Viewport.ViewHelper.js',
 
 	'./js/Command.js',
 	'./js/commands/AddObjectCommand.js',

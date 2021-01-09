@@ -1,5 +1,15 @@
+import {
+	BufferGeometry,
+	Color,
+	DoubleSide,
+	Geometry,
+	Matrix4,
+	Mesh,
+	MeshBasicMaterial,
+	MeshLambertMaterial
+} from '../../../build/three.module.js';
+
 /**
- * @author Garrett Johnson / http://gkjohnson.github.io/
  * https://github.com/gkjohnson/collada-exporter-js
  *
  * Usage:
@@ -10,17 +20,6 @@
  * Format Definition:
  *  https://www.khronos.org/collada/
  */
-
-import {
-	BufferGeometry,
-	Color,
-	DoubleSide,
-	Geometry,
-	Matrix4,
-	Mesh,
-	MeshBasicMaterial,
-	MeshLambertMaterial
-} from "../../../build/three.module.js";
 
 var ColladaExporter = function () {};
 
@@ -111,8 +110,8 @@ ColladaExporter.prototype = {
 			canvas = canvas || document.createElement( 'canvas' );
 			ctx = ctx || canvas.getContext( '2d' );
 
-			canvas.width = image.naturalWidth;
-			canvas.height = image.naturalHeight;
+			canvas.width = image.width;
+			canvas.height = image.height;
 
 			ctx.drawImage( image, 0, 0 );
 
@@ -265,6 +264,15 @@ ColladaExporter.prototype = {
 
 				}
 
+				// serialize lightmap uvs
+				if ( 'uv2' in bufferGeometry.attributes ) {
+
+					var uvName = `${ meshid }-texcoord2`;
+					gnode += getAttribute( bufferGeometry.attributes.uv2, uvName, [ 'S', 'T' ], 'float' );
+					triangleInputs += `<input semantic="TEXCOORD" source="#${ uvName }" offset="0" set="1" />`;
+
+				}
+
 				// serialize colors
 				if ( 'color' in bufferGeometry.attributes ) {
 
@@ -299,7 +307,7 @@ ColladaExporter.prototype = {
 
 				}
 
-				gnode += `</mesh></geometry>`;
+				gnode += '</mesh></geometry>';
 
 				libraryGeometries.push( gnode );
 
@@ -398,10 +406,10 @@ ColladaExporter.prototype = {
 				if ( m.transparent === true ) {
 
 					transparencyNode +=
-						`<transparent>` +
+						'<transparent>' +
 						(
 							m.map ?
-								`<texture texture="diffuse-sampler"></texture>` :
+								'<texture texture="diffuse-sampler"></texture>' :
 								'<float>1</float>'
 						) +
 						'</transparent>';
@@ -518,7 +526,7 @@ ColladaExporter.prototype = {
 
 					(
 						m.side === DoubleSide ?
-							`<extra><technique profile="THREEJS"><double_sided sid="double_sided" type="int">1</double_sided></technique></extra>` :
+							'<extra><technique profile="THREEJS"><double_sided sid="double_sided" type="int">1</double_sided></technique></extra>' :
 							''
 					) +
 
@@ -573,8 +581,8 @@ ColladaExporter.prototype = {
 					matidsArray = new Array( materials.length );
 
 				}
-				matids = matidsArray.fill()
-					.map( ( v, i ) => processMaterial( materials[ i % materials.length ] ) );
+
+				matids = matidsArray.fill().map( ( v, i ) => processMaterial( materials[ i % materials.length ] ) );
 
 				node +=
 					`<instance_geometry url="#${ meshid }">` +
