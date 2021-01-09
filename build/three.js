@@ -45475,7 +45475,7 @@
 	function intersectObject( object, raycaster, intersects, recursive ) {
 
 		// AXC: Skip objects that are not visible (unless we explicitly set intersectNonVisible to true)
-		if (!this.intersectNonVisible) {
+		if (!raycaster.intersectNonVisible) {
 			if ( object.visible === false ) { return; }
 		}
 
