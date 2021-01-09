@@ -14592,6 +14592,9 @@
 	var vsm_vert = "void main() {\n\tgl_Position = vec4( position, 1.0 );\n}";
 
 	function WebGLShadowMap(_renderer, _objects, maxTextureSize) {
+		//MS: Add map for keeping track of reported warnings and reducing verbosity
+		var __reported = {};
+
 		var _frustum = new Frustum();
 
 		var _shadowMapSize = new Vector2(),
@@ -14663,7 +14666,12 @@
 				var shadow = light.shadow;
 
 				if (shadow === undefined) {
-					console.warn('THREE.WebGLShadowMap:', light, 'has no shadow.');
+					// NOTE (MS) don't warn about no shadows all the time
+					if (!__reported['no-shadow']) {
+						console.warn('THREE.WebGLShadowMap:', light, 'has no shadow.');
+						__reported['no-shadow'] = 1;
+					}
+
 					continue;
 				}
 
@@ -36836,7 +36844,8 @@
 			console.error('THREE.Matrix3: .applyToVector3Array() has been removed.');
 		},
 		getInverse: function getInverse(matrix) {
-			console.warn('THREE.Matrix3: .getInverse() has been removed. Use matrixInv.copy( matrix ).invert(); instead.');
+			// NOTE (MS) ignore getInverse deprecation warning
+			// console.warn( 'THREE.Matrix3: .getInverse() has been removed. Use matrixInv.copy( matrix ).invert(); instead.' );
 			return this.copy(matrix).invert();
 		}
 	});
@@ -36910,7 +36919,8 @@
 			return this.makePerspective(left, right, top, bottom, near, far);
 		},
 		getInverse: function getInverse(matrix) {
-			console.warn('THREE.Matrix4: .getInverse() has been removed. Use matrixInv.copy( matrix ).invert(); instead.');
+			// NOTE (MS) ignore getInverse deprecation warning
+			// console.warn( 'THREE.Matrix4: .getInverse() has been removed. Use matrixInv.copy( matrix ).invert(); instead.' );
 			return this.copy(matrix).invert();
 		}
 	});
@@ -36926,7 +36936,8 @@
 			return vector.applyQuaternion(this);
 		},
 		inverse: function inverse() {
-			console.warn('THREE.Quaternion: .inverse() has been renamed to invert().');
+			// NOTE (MS) ignore inverse deprecation warning
+			// console.warn( 'THREE.Quaternion: .inverse() has been renamed to invert().' );
 			return this.invert();
 		}
 	});

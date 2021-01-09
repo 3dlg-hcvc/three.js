@@ -15,6 +15,9 @@ import vsm_vert from '../shaders/ShaderLib/vsm_vert.glsl.js';
 
 function WebGLShadowMap( _renderer, _objects, maxTextureSize ) {
 
+	//MS: Add map for keeping track of reported warnings and reducing verbosity
+	const __reported = {};
+
 	let _frustum = new Frustum();
 
 	const _shadowMapSize = new Vector2(),
@@ -98,8 +101,12 @@ function WebGLShadowMap( _renderer, _objects, maxTextureSize ) {
 			const shadow = light.shadow;
 
 			if ( shadow === undefined ) {
+				// NOTE (MS) don't warn about no shadows all the time
+				if (!__reported['no-shadow']) {
+					console.warn( 'THREE.WebGLShadowMap:', light, 'has no shadow.' );
+					__reported['no-shadow'] = 1;
+				}
 
-				console.warn( 'THREE.WebGLShadowMap:', light, 'has no shadow.' );
 				continue;
 
 			}

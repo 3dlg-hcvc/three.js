@@ -615,7 +615,8 @@ Object.assign( Matrix3.prototype, {
 	},
 	getInverse: function ( matrix ) {
 
-		console.warn( 'THREE.Matrix3: .getInverse() has been removed. Use matrixInv.copy( matrix ).invert(); instead.' );
+		// NOTE (MS) ignore getInverse deprecation warning
+		// console.warn( 'THREE.Matrix3: .getInverse() has been removed. Use matrixInv.copy( matrix ).invert(); instead.' );
 		return this.copy( matrix ).invert();
 
 	}
@@ -726,7 +727,8 @@ Object.assign( Matrix4.prototype, {
 	},
 	getInverse: function ( matrix ) {
 
-		console.warn( 'THREE.Matrix4: .getInverse() has been removed. Use matrixInv.copy( matrix ).invert(); instead.' );
+		// NOTE (MS) ignore getInverse deprecation warning
+		// console.warn( 'THREE.Matrix4: .getInverse() has been removed. Use matrixInv.copy( matrix ).invert(); instead.' );
 		return this.copy( matrix ).invert();
 
 	}
@@ -750,7 +752,8 @@ Object.assign( Quaternion.prototype, {
 	},
 	inverse: function ( ) {
 
-		console.warn( 'THREE.Quaternion: .inverse() has been renamed to invert().' );
+		// NOTE (MS) ignore inverse deprecation warning
+		// console.warn( 'THREE.Quaternion: .inverse() has been renamed to invert().' );
 		return this.invert();
 
 	}

@@ -19043,6 +19043,9 @@ var vsm_vert = "void main() {\n\tgl_Position = vec4( position, 1.0 );\n}";
 
 function WebGLShadowMap( _renderer, _objects, maxTextureSize ) {
 
+	//MS: Add map for keeping track of reported warnings and reducing verbosity
+	const __reported = {};
+
 	let _frustum = new Frustum();
 
 	const _shadowMapSize = new Vector2(),
@@ -19126,8 +19129,12 @@ function WebGLShadowMap( _renderer, _objects, maxTextureSize ) {
 			const shadow = light.shadow;
 
 			if ( shadow === undefined ) {
+				// NOTE (MS) don't warn about no shadows all the time
+				if (!__reported['no-shadow']) {
+					console.warn( 'THREE.WebGLShadowMap:', light, 'has no shadow.' );
+					__reported['no-shadow'] = 1;
+				}
 
-				console.warn( 'THREE.WebGLShadowMap:', light, 'has no shadow.' );
 				continue;
 
 			}
@@ -49892,7 +49899,8 @@ Object.assign( Matrix3.prototype, {
 	},
 	getInverse: function ( matrix ) {
 
-		console.warn( 'THREE.Matrix3: .getInverse() has been removed. Use matrixInv.copy( matrix ).invert(); instead.' );
+		// NOTE (MS) ignore getInverse deprecation warning
+		// console.warn( 'THREE.Matrix3: .getInverse() has been removed. Use matrixInv.copy( matrix ).invert(); instead.' );
 		return this.copy( matrix ).invert();
 
 	}
@@ -50003,7 +50011,8 @@ Object.assign( Matrix4.prototype, {
 	},
 	getInverse: function ( matrix ) {
 
-		console.warn( 'THREE.Matrix4: .getInverse() has been removed. Use matrixInv.copy( matrix ).invert(); instead.' );
+		// NOTE (MS) ignore getInverse deprecation warning
+		// console.warn( 'THREE.Matrix4: .getInverse() has been removed. Use matrixInv.copy( matrix ).invert(); instead.' );
 		return this.copy( matrix ).invert();
 
 	}
@@ -50027,7 +50036,8 @@ Object.assign( Quaternion.prototype, {
 	},
 	inverse: function ( ) {
 
-		console.warn( 'THREE.Quaternion: .inverse() has been renamed to invert().' );
+		// NOTE (MS) ignore inverse deprecation warning
+		// console.warn( 'THREE.Quaternion: .inverse() has been renamed to invert().' );
 		return this.invert();
 
 	}
