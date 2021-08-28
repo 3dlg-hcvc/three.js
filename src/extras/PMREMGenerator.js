@@ -24,6 +24,9 @@ import { Vector2 } from '../math/Vector2.js';
 import { Vector3 } from '../math/Vector3.js';
 import { Color } from '../math/Color.js';
 import { WebGLRenderTarget } from '../renderers/WebGLRenderTarget.js';
+import { MeshBasicMaterial } from '../materials/MeshBasicMaterial.js';
+import { BoxGeometry } from '../geometries/BoxGeometry.js';
+import { BackSide } from '../constants.js';
 
 const LOD_MIN = 4;
 const LOD_MAX = 8;
@@ -84,7 +87,10 @@ const _axisDirections = [
  * even more filtered 'mips' at the same LOD_MIN resolution, associated with
  * higher roughness levels. In this way we maintain resolution to smoothly
  * interpolate diffuse lighting while limiting sampling computation.
- */
+ *
+ * Paper: Fast, Accurate Image-Based Lighting
+ * https://drive.google.com/file/d/15y8r_UpKlU9SvV4ILb0C3qCPecS8pvLz/view
+*/
 
 class PMREMGenerator {
 
@@ -257,25 +263,41 @@ class PMREMGenerator {
 		const forwardSign = [ 1, 1, 1, - 1, - 1, - 1 ];
 		const renderer = this._renderer;
 
+		const originalAutoClear = renderer.autoClear;
 		const outputEncoding = renderer.outputEncoding;
 		const toneMapping = renderer.toneMapping;
 		renderer.getClearColor( _clearColor );
-		const clearAlpha = renderer.getClearAlpha();
 
 		renderer.toneMapping = NoToneMapping;
 		renderer.outputEncoding = LinearEncoding;
+		renderer.autoClear = false;
 
-		let background = scene.background;
-		if ( background && background.isColor ) {
+		const backgroundMaterial = new MeshBasicMaterial( {
+			name: 'PMREM.Background',
+			side: BackSide,
+			depthWrite: false,
+			depthTest: false,
+		} );
 
-			background.convertSRGBToLinear();
-			// Convert linear to RGBE
-			const maxComponent = Math.max( background.r, background.g, background.b );
-			const fExp = Math.min( Math.max( Math.ceil( Math.log2( maxComponent ) ), - 128.0 ), 127.0 );
-			background = background.multiplyScalar( Math.pow( 2.0, - fExp ) );
-			const alpha = ( fExp + 128.0 ) / 255.0;
-			renderer.setClearColor( background, alpha );
-			scene.background = null;
+		const backgroundBox = new Mesh( new BoxGeometry(), backgroundMaterial );
+
+		let useSolidColor = false;
+		const background = scene.background;
+
+		if ( background ) {
+
+			if ( background.isColor ) {
+
+				backgroundMaterial.color.copy( background );
+				scene.background = null;
+				useSolidColor = true;
+
+			}
+
+		} else {
+
+			backgroundMaterial.color.copy( _clearColor );
+			useSolidColor = true;
 
 		}
 
@@ -302,13 +324,24 @@ class PMREMGenerator {
 			_setViewport( cubeUVRenderTarget,
 				col * SIZE_MAX, i > 2 ? SIZE_MAX : 0, SIZE_MAX, SIZE_MAX );
 			renderer.setRenderTarget( cubeUVRenderTarget );
+
+			if ( useSolidColor ) {
+
+				renderer.render( backgroundBox, cubeCamera );
+
+			}
+
 			renderer.render( scene, cubeCamera );
 
 		}
 
+		backgroundBox.geometry.dispose();
+		backgroundBox.material.dispose();
+
 		renderer.toneMapping = toneMapping;
 		renderer.outputEncoding = outputEncoding;
-		renderer.setClearColor( _clearColor, clearAlpha );
+		renderer.autoClear = originalAutoClear;
+		scene.background = background;
 
 	}
 

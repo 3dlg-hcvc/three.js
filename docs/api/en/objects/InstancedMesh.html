@@ -33,7 +33,7 @@
 		<h2>Constructor</h2>
 		<h3>[name]( [param:BufferGeometry geometry], [param:Material material], [param:Integer count] )</h3>
 		<p>
-		[page:Geometry geometry] - an instance of [page:BufferGeometry].<br />
+		[page:BufferGeometry geometry] - an instance of [page:BufferGeometry].<br />
 		[page:Material material] - an instance of [page:Material]. Default is a new [page:MeshBasicMaterial].<br />
 		[page:Integer count] - the number of instances.<br />
 		</p>
@@ -51,13 +51,13 @@
 			If you need more instances than the original count value, you have to create a new [name].
 		</p>
 
-		<h3>[property:BufferAttribute instanceColor]</h3>
+		<h3>[property:InstancedBufferAttribute instanceColor]</h3>
 		<p>
 			Represents the colors of all instances. *null* by default.
 			You have to set its [page:BufferAttribute.needsUpdate needsUpdate] flag to true if you modify instanced data via [page:.setColorAt]().
 		</p>
 
-		<h3>[property:BufferAttribute instanceMatrix]</h3>
+		<h3>[property:InstancedBufferAttribute instanceMatrix]</h3>
 		<p>
 			Represents the local transformation of all instances.
 			You have to set its [page:BufferAttribute.needsUpdate needsUpdate] flag to true if you modify instanced data via [page:.setMatrixAt]().

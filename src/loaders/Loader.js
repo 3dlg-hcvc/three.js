@@ -1,25 +1,24 @@
 import { DefaultLoadingManager } from './LoadingManager.js';
 
-function Loader( manager ) {
+class Loader {
 
-	this.manager = ( manager !== undefined ) ? manager : DefaultLoadingManager;
+	static DefaultMaterialType = 'MeshPhysicalMaterial';  // NOTE(MS): MeshLambertMaterial breaks light shadow mapping
 
-	this.crossOrigin = 'anonymous';
-	this.withCredentials = false;
-	this.path = '';
-	this.resourcePath = '';
-	this.requestHeader = {};
+	constructor( manager ) {
 
-}
+		this.manager = ( manager !== undefined ) ? manager : DefaultLoadingManager;
 
-Loader.DefaultMaterialType = 'MeshPhysicalMaterial';  // NOTE(MS): MeshLambertMaterial breaks light shadow mapping
+		this.crossOrigin = 'anonymous';
+		this.withCredentials = false;
+		this.path = '';
+		this.resourcePath = '';
+		this.requestHeader = {};
 
+	}
 
-Object.assign( Loader.prototype, {
+	load( /* url, onLoad, onProgress, onError */ ) {}
 
-	load: function ( /* url, onLoad, onProgress, onError */ ) {},
-
-	loadAsync: function ( url, onProgress ) {
+	loadAsync( url, onProgress ) {
 
 		const scope = this;
 
@@ -29,43 +28,45 @@ Object.assign( Loader.prototype, {
 
 		} );
 
-	},
+	}
 
-	parse: function ( /* data */ ) {},
+	parse( /* data */ ) {}
 
-	setCrossOrigin: function ( crossOrigin ) {
+	setCrossOrigin( crossOrigin ) {
 
 		this.crossOrigin = crossOrigin;
 		return this;
 
-	},
+	}
 
-	setWithCredentials: function ( value ) {
+	setWithCredentials( value ) {
 
 		this.withCredentials = value;
 		return this;
 
-	},
+	}
 
-	setPath: function ( path ) {
+	setPath( path ) {
+
 		this.path = path;
 		return this;
-	},
 
-	setResourcePath: function ( resourcePath ) {
+	}
+
+	setResourcePath( resourcePath ) {
 
 		this.resourcePath = resourcePath;
 		return this;
 
-	},
+	}
 
-	setRequestHeader: function ( requestHeader ) {
+	setRequestHeader( requestHeader ) {
 
 		this.requestHeader = requestHeader;
 		return this;
 
 	}
 
-} );
+}
 
 export { Loader };

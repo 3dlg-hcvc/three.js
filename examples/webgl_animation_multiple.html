@@ -10,7 +10,7 @@
 		<div id="container"></div>
 
 		<div id="info">
-			This demo shows how clone a skinned 3d model using <strong>SkeletonUtils.clone()</strong><br/>
+			This demo shows how to clone a skinned 3d model using <strong>SkeletonUtils.clone()</strong><br/>
 			Soldier model from <a href="https://www.mixamo.com" target="_blank" rel="noopener">https://www.mixamo.com</a>.
 		</div>
 
@@ -19,7 +19,7 @@
 			import * as THREE from '../build/three.module.js';
 
 			import { GLTFLoader } from './jsm/loaders/GLTFLoader.js';
-			import { SkeletonUtils } from './jsm/utils/SkeletonUtils.js';
+			import * as SkeletonUtils from './jsm/utils/SkeletonUtils.js';
 
 			//////////////////////////////
 			// Global objects
@@ -43,7 +43,6 @@
 			const MODELS = [
 				{ name: "Soldier" },
 				{ name: "Parrot" },
-				// { name: "RiflePunch" },
 			];
 
 			// Here we define instances of the models that we want to place in the scene, their position, scale and the animations
@@ -359,7 +358,7 @@
 
 				// ground
 				const groundMesh = new THREE.Mesh(
-					new THREE.PlaneBufferGeometry( 40, 40 ),
+					new THREE.PlaneGeometry( 40, 40 ),
 					new THREE.MeshPhongMaterial( {
 						color: 0x999999,
 						depthWrite: false
@@ -369,7 +368,7 @@
 				groundMesh.rotation.x = - Math.PI / 2;
 				groundMesh.receiveShadow = true;
 				worldScene.add( groundMesh );
-				window.addEventListener( 'resize', onWindowResize, false );
+				window.addEventListener( 'resize', onWindowResize );
 
 			}
 
