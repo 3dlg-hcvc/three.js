@@ -134,6 +134,7 @@ THREE.OutlinePass.prototype = Object.assign( Object.create( THREE.Pass.prototype
 	setSize: function ( width, height ) {
 
 		this.renderTargetMaskBuffer.setSize( width, height );
+		this.renderTargetDepthBuffer.setSize( width, height );
 
 		var resx = Math.round( width / this.downSampleRatio );
 		var resy = Math.round( height / this.downSampleRatio );
@@ -438,7 +439,7 @@ THREE.OutlinePass.prototype = Object.assign( Object.create( THREE.Pass.prototype
 				'	#include <project_vertex>',
 
 				'	vPosition = mvPosition;',
-				'	vec4 worldPosition = modelMatrix * vec4( position, 1.0 );',
+				'	vec4 worldPosition = modelMatrix * vec4( transformed, 1.0 );',
 				'	projTexCoord = textureMatrix * worldPosition;',
 
 				'}'
