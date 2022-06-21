@@ -1,23 +1,26 @@
 ( function () {
+	function toConvexHull(points) {
+		if ( THREE.ConvexHull === undefined ) {
+			console.error( 'THREE.ConvexBufferGeometry: ConvexBufferGeometry relies on THREE.ConvexHull' );
+		}
+
+		const convexHull = new THREE.ConvexHull({minimizeFacePlanes: true});
+		convexHull.setFromPoints( points );
+		return convexHull;
+	}
 
 	class ConvexGeometry extends THREE.BufferGeometry {
-
-		constructor( points ) {
+		// AXC: Have constructor from convexHull directly (not points)
+		constructor( convexHull ) {
 
 			super(); // buffers
 
 			const vertices = [];
 			const normals = [];
 
-			if ( THREE.ConvexHull === undefined ) {
-
-				console.error( 'THREE.ConvexBufferGeometry: ConvexBufferGeometry relies on THREE.ConvexHull' );
-
-			}
-
-			const convexHull = new THREE.ConvexHull().setFromPoints( points ); // generate vertices and normals
-
 			const faces = convexHull.faces;
+			// AXC: handle option to minimize face planes
+			const faceIndices = convexHull.minimizeFacePlanes? convexHull.getFaceIndices() : null;
 
 			for ( let i = 0; i < faces.length; i ++ ) {
 
@@ -38,7 +41,16 @@
 
 			this.setAttribute( 'position', new THREE.Float32BufferAttribute( vertices, 3 ) );
 			this.setAttribute( 'normal', new THREE.Float32BufferAttribute( normals, 3 ) );
+			// AXC: add face indices
+			if (faceIndices) {
+				this.setIndex(faceIndices);
+			}
 
+		}
+
+		static fromPoints(points) {
+			const convexHull = toConvexHull(points);
+			return new THREE.ConvexGeometry(convexHull);
 		}
 
 	}
