@@ -1,4 +1,3 @@
-import { RGBAFormat, RGBFormat } from '../constants.js';
 import { ImageLoader } from './ImageLoader.js';
 import { Texture } from '../textures/Texture.js';
 import { Loader } from './Loader.js';
@@ -22,16 +21,6 @@ class TextureLoader extends Loader {
 		loader.load( url, function ( image ) {
 
 			texture.image = image;
-
-			// AXC: Comment out check for jpeg and setting of texture.format
-			//      Breaks rendering of textures in headless mode
-			// JPEGs can't have an alpha channel, so memory can be saved by storing them as RGB.
-
-			//const isJPEG = url.search( /\.jpe?g($|\?)/i ) > 0 || url.search( /^data\:image\/jpeg/ ) === 0;
-
-			//texture.format = isJPEG ? RGBFormat : RGBAFormat;
-
-
 			texture.needsUpdate = true;
 
 			if ( onLoad !== undefined ) {

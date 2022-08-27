@@ -170,6 +170,7 @@ const jsmFolder = path.resolve( __dirname, '../../examples/jsm' );
 // list of all .js file nested in the examples/jsm folder
 const files = glob.sync( '**/*.js', { cwd: jsmFolder, ignore: [
 	// don't convert libs
+	'capabilities/*',
 	'libs/**/*',
 	'loaders/ifc/**/*',
 
@@ -180,10 +181,7 @@ const files = glob.sync( '**/*.js', { cwd: jsmFolder, ignore: [
 	// no non-module library
 	// https://unpkg.com/browse/web-ifc@0.0.17/
 	'loaders/IFCLoader.js',
-
-	// no non-module library
-	// https://unpkg.com/browse/ktx-parse@0.2.1/dist/
-	'loaders/KTX2Loader.js',
+	'node-editor/**/*',
 
 	'renderers/webgl/**/*',
 	'renderers/webgpu/**/*',
@@ -191,6 +189,10 @@ const files = glob.sync( '**/*.js', { cwd: jsmFolder, ignore: [
 	'nodes/**/*',
 	'loaders/NodeMaterialLoader.js',
 	'offscreen/**/*',
+
+	// dont convert new files
+	'exporters/KTX2Exporter.js',
+
 ] } );
 
 
